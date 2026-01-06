@@ -1,0 +1,23 @@
+# Sensitive Files
+*.key
+*.pem
+*password*
+*secret*
+.env
+
+# Cisco Packet Tracer Backup Files
+*.pkz
+
+# System Files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# IDE Files
+.vscode/
+.idea/
+*.swp
+
+# Large Files
+*.iso
+*.ova
