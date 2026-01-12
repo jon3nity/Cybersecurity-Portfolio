@@ -1,0 +1,44 @@
+# Panel 3: Failed Purchase Errors by HTTP Status Code
+# Purpose: Determines root cause category by analyzing status error type
+# Diagnostic Value: Distinguishes between client errors, server capacity issues, & application defects which maybe be redirectories
+
+sourcetype="access_combined_wcookie" status!=200 action=purchase 
+| stats count by status
+| sort -count
+| rename status as "Error Status"
+
+# Visualization: Pie Chart
+# Purpose: Shows percentage distribution of error types at a glance
+# Key Finding: 503 errors account for 58.4% of all failures (1,498 of 2,565)
+
+# Status Code Analysis and Diagnostic Significance:
+#
+# 5xx Server Errors (IT Operations Responsibility):
+#   - 503 Service Unavailable: 1,490 (58.09%) - Server overloaded, cannot handle more requests
+#   - 500 Internal Server Error: 170 (6.6%) - Application code defects or crashes
+#   - 505 HTTP Version Not Supported: 165 (6.4%) - Configuration issues
+#
+# 4xx Client Errors (Limited Remediation):
+#   - 408 Request Timeout: 220 (8.6%) - Server too slow to respond (capacity-related)
+#   - 400 Bad Request: 185 (7.2%) - Malformed client requests
+#   - 406 Not Acceptable: 185 (7.2%) - Content negotiation failures
+#   - 404 Not Found: 105 (4.0%) - Broken links or mistyped URLs
+#   - 403 Forbidden: 45 (1.8%) - Authentication/authorization failures
+
+# Root Cause Determination:
+# The dominance of 503 errors actually indicates server capacity issues.
+# Combined with 408 timeouts (server too slow), capacity-related errors represent 69.3% of failures.
+# This pattern, combined with correlation to peak traffic in (Panel 2), confirms infrastructure upgrade as the primary solution.
+
+# Possibilities that has been ruled out:
+# - If 500 errors dominated: Application bug investigation would be required
+# - If 404 errors dominated: Content management and link validation needed
+# - If 403 errors dominated: Authentication system review necessary
+# - If errors were evenly distributed: All independent issues would be have to be investigated
+
+# Key Learning Points:
+# - The HTTP status codes provide definitive diagnostic information
+# - Error distribution analysis helped in focused solution
+# - 'stats count by status' created the status distribution
+# - 'sort -count' orders by most common errors first
+# - Pie chart effectively communicates percentage distribution to non-technical stakeholders

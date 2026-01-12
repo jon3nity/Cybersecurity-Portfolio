@@ -1,0 +1,63 @@
+# Panel 4: Total Lost Revenue
+## Purpose: Calculates the total business impact based on the 'total revenue lost' for visibility and budget justification
+# Strategic Value: A Single metric that shows immediate understanding of problem severity
+
+sourcetype="access_combined_wcookie" status!=200 action=purchase 
+| lookup prices.csv productId OUTPUT product_name price
+| stats count by product_name, price
+| eval lost_revenue = count * price
+| stats sum(lost_revenue) as "Total Lost Revenue"
+| eval "Total Lost Revenue" = round('Total Lost Revenue')
+
+# Visualization: Single Value
+# Display: Large numeric value (red background for impact emphasis)
+# Result: EUR 33,707.15
+
+# 4-Stage Explanation:
+# Stage 1: Field Search extraction for unsuccessful purchase action
+#   sourcetype="access_combined_wcookie" status!=200 action=purchase 
+#   | lookup prices.csv productId OUTPUT product_name price
+#
+#   This search string looks for unsuccessful (status!=200) purchases (action=purchase)
+#
+# Stage 2: Each product's unsuccessful purchase * price (summation)
+#   | stats count by product_name, price
+#   | eval lost_revenue = count * price
+#   
+#    This creates one row per product and corresponding price; with its total lost revenue, due to an unsuccessful purchase:
+#   - Grand Theft Scooter: 310 failures × €26.99 = €8,366.90
+#   - Dream Crusher: 100 failures × €39.99 = 3999.00
+#   - (continues for all products)
+#
+# Stage 3: Total Calculation
+#   | stats sum(lost_revenue) as "Total Lost Revenue"
+#   
+#   This sums all individual lost revenues for products into A single total number:
+#   €8,366.90 + €3999.00 + ... = €33,707.15
+
+# Floating-Point Correction:
+#   | eval "Total Lost Revenue" = round('Total Lost Revenue')
+#   
+#   Total with decimal values (like €24.99) produce decimals that accumulate across thousands of transactions. Without rounding:
+#   Result: 33707.14999999994 (unprofessional presentation)
+#   With rounding: 33707.15 (proper currency format)
+
+# Executive Communication Strategy:
+# This panel serves as the dashboard's "headline" - the first number executives see that answers: "How bad is the problem?" before exploring detailed diagnostics.
+#
+# Budget Justification Context:
+# - Lost Revenue: EUR 33,707 over 10 days would nmean EUR 101,121 monthly impact
+# - Infrastructure Investment: EUR 50,000-100,000 for scaling solution
+# - ROI: Payback within 2-3 months, plus supports business growth
+#
+# Presentation Flow:
+# 1. Show single value metric: "We lost EUR 33,707 in 10 days"
+# 2. Show Panel 1: "Here's which products suffered most"
+# 3. Show Panel 2: "The problem occurs during peak traffic hours"
+# 4. Show Panel 3: "503 errors prove it's a capacity issue"
+# 5. Conclusion: "We need infrastructure scaling investment"
+
+# Key Points:
+# - This Single value visualization provides executive-level impact communication before technical details
+# - The 3-stage stats aggregation enables complex calculations
+# - The round() function ensures professional financial data presentation

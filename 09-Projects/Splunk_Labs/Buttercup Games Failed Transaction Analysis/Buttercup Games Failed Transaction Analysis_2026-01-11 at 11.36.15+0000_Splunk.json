@@ -1,0 +1,289 @@
+{
+  "dataSources": {
+    "ds_wyWwK8ta": {
+      "type": "ds.search",
+      "options": {
+        "query": "sourcetype=\"access_combined_wcookie\" status!=200 action=purchase \r\n| lookup prices.csv productId OUTPUT product_name, price\r\n| stats count by product_name, price\r\n| eval lost_revenue = count * price | sort -lost_revenue\r\n| stats sum(lost_revenue) as \"Total Lost Revenue\" | eval \"Total Lost Revenue\" = round('Total Lost Revenue')",
+        "queryParameters": {
+          "earliest": "1766318400",
+          "latest": "1767182400",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Total Revenue Lost search"
+    },
+    "ds_ODPGVN4c": {
+      "type": "ds.search",
+      "options": {
+        "query": "sourcetype=\"access_combined_wcookie\" status!=200 action=purchase \n| stats count by status | sort -count | rename status as \"Error Status\"",
+        "queryParameters": {
+          "earliest": "1766318400",
+          "latest": "1767182400",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Failed Purchase Errors by HTTP Status Code search"
+    },
+    "ds_4FabO05K": {
+      "type": "ds.search",
+      "options": {
+        "query": "sourcetype=\"access_combined_wcookie\" status!=200 | timechart count span=1h \n|  rename count as \"Traffic Failures\"",
+        "queryParameters": {
+          "earliest": "0",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Failed Transactions Over Time _Hourly_ search"
+    },
+    "ds_zOJStyPJ": {
+      "type": "ds.search",
+      "options": {
+        "query": "sourcetype=\"access_combined_wcookie\" status!=200 action=purchase | lookup prices.csv productId OUTPUT product_name, price \n| stats count by product_name, price \n| eval lost_revenue=count * price \n| sort -lost_revenue \n| head 10 | fields product_name lost_revenue | rename lost_revenue as \"Lost Revenue\"",
+        "queryParameters": {
+          "earliest": "0",
+          "sampleRatio": 1
+        }
+      },
+      "name": "Top 10 Products by Lost Revenue - Bar chart search"
+    }
+  },
+  "visualizations": {
+    "viz_D9hY6XkT": {
+      "type": "splunk.singlevalue",
+      "options": {
+        "numberPrecision": 0,
+        "sparklineDisplay": "below",
+        "trendDisplay": "absolute",
+        "unitPosition": "after",
+        "shouldUseThousandSeparators": true,
+        "majorColor": "#ffffff",
+        "backgroundColor": "#dc4e41"
+      },
+      "context": {
+        "convertedColorRange": [
+          {
+            "from": 100,
+            "value": "#dc4e41"
+          },
+          {
+            "from": 70,
+            "to": 100,
+            "value": "#f1813f"
+          },
+          {
+            "from": 30,
+            "to": 70,
+            "value": "#f8be34"
+          },
+          {
+            "from": 0,
+            "to": 30,
+            "value": "#0877a6"
+          },
+          {
+            "to": 0,
+            "value": "#53a051"
+          }
+        ]
+      },
+      "dataSources": {
+        "primary": "ds_wyWwK8ta"
+      },
+      "title": "Total Revenue Lost"
+    },
+    "viz_cp6fZ1Ip": {
+      "type": "splunk.pie",
+      "options": {
+        "collapseThreshold": 0.01
+      },
+      "dataSources": {
+        "primary": "ds_ODPGVN4c"
+      },
+      "title": "Failed Purchase Errors by HTTP Status Code",
+      "description": "Breakdown of Error issues - 503 (Service Unavailable) indicates server capacity constraints during peak traffic"
+    },
+    "viz_P8q6YYso": {
+      "type": "splunk.line",
+      "options": {
+        "yAxisAbbreviation": "auto",
+        "y2AxisAbbreviation": "auto",
+        "showRoundedY2AxisLabels": false,
+        "legendTruncation": "ellipsisMiddle",
+        "showY2MajorGridLines": true,
+        "xAxisLabelRotation": 0,
+        "yAxisMajorTickInterval": 50,
+        "xAxisTitleText": "Time",
+        "xAxisTitleVisibility": "show",
+        "yAxisTitleText": "Failures Activity",
+        "yAxisTitleVisibility": "show",
+        "y2AxisTitleVisibility": "show",
+        "yAxisScale": "linear",
+        "showOverlayY2Axis": false,
+        "y2AxisScale": "inherit",
+        "nullValueDisplay": "gaps",
+        "dataValuesDisplay": "off",
+        "showSplitSeries": false,
+        "showIndependentYRanges": false,
+        "legendMode": "standard",
+        "legendDisplay": "right",
+        "lineWidth": 2,
+        "seriesColors": [
+          "#7B56DB",
+          "#009CEB",
+          "#dc4e41",
+          "#DD9900",
+          "#FF677B",
+          "#CB2196",
+          "#813193",
+          "#0051B5",
+          "#008C80",
+          "#99B100",
+          "#FFA476",
+          "#FF6ACE",
+          "#AE8CFF",
+          "#00689D",
+          "#00490A",
+          "#465D00",
+          "#9D6300",
+          "#F6540B",
+          "#FF969E",
+          "#E47BFE"
+        ],
+        "seriesColorsByField": {
+          "_time": "#7B56DB",
+          "Traffic Failures": "#009CEB",
+          "_span": "#00CDAF"
+        }
+      },
+      "dataSources": {
+        "primary": "ds_4FabO05K"
+      },
+      "title": "Web Application Failures Over Time (Hourly)",
+      "description": "Captures ALL non-200 responses including:  Failed purchases, Failed browsing, Failed add-to-cart operations, Failed searches. Any other HTTP errors across the entire web application"
+    },
+    "viz_O6FsniID": {
+      "type": "splunk.bar",
+      "options": {
+        "yAxisAbbreviation": "auto",
+        "y2AxisAbbreviation": "auto",
+        "showRoundedY2AxisLabels": false,
+        "legendTruncation": "ellipsisMiddle",
+        "showY2MajorGridLines": true,
+        "xAxisTitleText": "Product Name",
+        "xAxisTitleVisibility": "show",
+        "yAxisTitleText": "Lost Revenue (EUR)",
+        "yAxisTitleVisibility": "show",
+        "y2AxisTitleVisibility": "show",
+        "yAxisScale": "linear",
+        "dataValuesDisplay": "off",
+        "stackMode": "auto",
+        "showSplitSeries": false,
+        "showIndependentYRanges": false,
+        "legendDisplay": "right"
+      },
+      "dataSources": {
+        "primary": "ds_zOJStyPJ"
+      },
+      "title": "Top 10 Games that Lost Revenue",
+      "description": "Top 10 Games that weren't Purchased Successfully, thereby losing revenues on them"
+    }
+  },
+  "applicationProperties": {
+    "hideEdit": false,
+    "hideExport": false
+  },
+  "inputs": {
+    "input_global_trp": {
+      "type": "input.timerange",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-24h@h,now"
+      },
+      "title": "Global Time Range"
+    }
+  },
+  "layout": {
+    "options": {},
+    "globalInputs": [
+      "input_global_trp"
+    ],
+    "tabs": {
+      "items": [
+        {
+          "layoutId": "layout_1",
+          "label": "New tab"
+        }
+      ]
+    },
+    "layoutDefinitions": {
+      "layout_1": {
+        "type": "grid",
+        "structure": [
+          {
+            "item": "viz_D9hY6XkT",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 0,
+              "w": 1436,
+              "h": 114
+            }
+          },
+          {
+            "item": "viz_O6FsniID",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 114,
+              "w": 915,
+              "h": 386
+            }
+          },
+          {
+            "item": "viz_P8q6YYso",
+            "type": "block",
+            "position": {
+              "x": 0,
+              "y": 500,
+              "w": 1436,
+              "h": 355
+            }
+          },
+          {
+            "item": "viz_cp6fZ1Ip",
+            "type": "block",
+            "position": {
+              "x": 915,
+              "y": 114,
+              "w": 521,
+              "h": 386
+            }
+          }
+        ],
+        "options": {
+          "width": 1440,
+          "height": 960
+        }
+      }
+    }
+  },
+  "title": "Buttercup Games Failed Transaction Analysis",
+  "description": "Analysis of failed purchase transactions and revenue impact",
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {
+          "queryParameters": {
+            "latest": "$global_time.latest$",
+            "earliest": "$global_time.earliest$"
+          }
+        }
+      }
+    },
+    "visualizations": {
+      "global": {
+        "showProgressBar": true
+      }
+    }
+  }
+}

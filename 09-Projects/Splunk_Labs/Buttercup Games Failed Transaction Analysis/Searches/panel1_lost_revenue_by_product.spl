@@ -1,0 +1,50 @@
+# Panel 1: Top 10 Products by Lost Revenue
+# Purpose: Identifies which 10 products suffered the most revenue loss from failed transactions
+# Business Value: Enables targeted inventory management, marketing compensation, and product-specific analysis
+
+sourcetype="access_combined_wcookie" status!=200 action=purchase 
+| lookup prices.csv productId OUTPUT product_name price
+| stats count by product_name, price
+| eval lost_revenue = count * price
+| sort -lost_revenue
+| head 10
+| fields product_name lost_revenue
+| rename lost_revenue as "Lost Revenue"
+
+# Visualization: Horizontal Bar Chart
+# X-Axis: Lost Revenue (EUR)
+# Y-Axis: Product Name
+# Format: Number abbreviations enabled (8.50K format)
+
+# 4-Stage Explanation:
+# Stage 1: Field Search extraction for unsuccessful purchase action
+#   sourcetype="access_combined_wcookie" status!=200 action=purchase 
+#   | lookup prices.csv productId OUTPUT product_name price
+#
+#   This search string looks for unsuccessful (status!=200) purchases (action=purchase)
+#
+# Stage 2: Each product's unsuccessful purchase * price (summation)
+#   | stats count by product_name, price
+#   | eval lost_revenue = count * price
+#   
+#   This creates one row per product and corresponding price; with its total lost revenue (lost_revenue), due to an unsuccessful purchase:
+#   - Grand Theft Scooter: 310 failures × €26.99 = €8,366.90
+#   - Dream Crusher: 100 failures × €39.99 = 3999.00
+#   - (continues for all products)
+#
+# Stage 3: Sorting by top 10 based on -lost_revenue
+#   | sort -lost_revenue
+#   | head 10
+#   | fields product_name lost_revenue
+#   This sums sorts the inital 16 products down to the 10 with most failed purchase/revenue lost,
+#   and shows only the relevant field we need:
+#
+# We then rename the field witha a proper String name:
+#   | rename lost_revenue as "Lost Revenue"
+#
+# Key Points:
+# - Lookup enrichment adds product_name and price at search time
+# - eval calculates lost_revenue by multiplying count * price
+# - sort -lost_revenue orders the events by descending revenue impact
+# - head 10 limits to top 10 products for executive focus
+# - fields command removes unnecessary columns for clean visualization

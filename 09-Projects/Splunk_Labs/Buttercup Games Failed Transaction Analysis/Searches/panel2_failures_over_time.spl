@@ -1,0 +1,38 @@
+# Panel 2: Web Application Failures Over Time (Hourly)
+# Purpose: Identifies patterns in status failure rates to analyze response issues failures
+# Scope: Captures ALL non-200 HTTP responses across the entire web application, not just purchases
+
+sourcetype="access_combined_wcookie" status!=200 
+| timechart count span=1h
+| rename count as "Traffic Failures"
+
+# Visualization: Line Chart
+# X-Axis: Time (hourly intervals)
+# Y-Axis: Failure Count
+# Pattern Identified: Baseline is between 100-200 failures/hour with periodic high spikes upto 250-300 during evening/night peak traffic
+and reduced spikes down to 70 during daytime business hours
+
+ 2-Stage Explanation:
+# Stage 1: Field Search extraction for unsuccessful purchase action
+#   sourcetype="access_combined_wcookie" status!=200
+#
+#   This search string captures all unsuccessful (status!=200) responses
+#
+# Stage 2: captures the results by time and groupd the events/occurences into 1hr chunks
+#   | timechart count span=1h
+#   | rename count as "Traffic Failures"
+
+
+# Rationale: This panel provides broader infrastructure health visibility beyond just failed transactions.
+# It captures failed browsing, add-to-cart operations, searches, and all other HTTP errors across the application.
+# This comprehensive view helps IT Operations understand overall system health and capacity constraints.
+
+# Key Learning Points:
+# - timechart automatically groups events into time buckets (span=1h specifies hourly)
+# - Time-series analysis enables pattern recognition (random vs sustained vs attack patterns)
+# - Consistent baseline with predictable peaks indicates capacity issues, not random failures
+# - rename improves field clarity for non-technical stakeholders
+
+# Root Cause Insight:
+# The correlation between failure spikes and peak traffic hours likely indicates server capacity constraints
+    rather than application bugs or security incidents, considering that these are when customers are out of office hours.
