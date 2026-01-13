@@ -121,7 +121,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 **Deep Dives:** Each folder README contains detailed configurations and learning notes
 
 ### For Technical Interviewers
-**Focus Areas:** [Compliance](./04-Compliance-Governance/) | [Security Operations](./02-Security-Operations/) | [Network Security](./01-Networking-Fundamentals/)
+**Focus Areas:** [Compliance](./04-Compliance-Governance/) | [Security Operations](./02-Security-Operations/) | [Network Security](./01-Networking-Fundamentals/) | [Projects](./08-Projects/)
 
 ---
 
