@@ -57,7 +57,10 @@ CyberSecurity-MSc-Portfolio/
 │   ├── ISO-27001/                    → ISMS implementation, control mapping
 │   ├── GDPR-Compliance/              → Data protection, privacy by design
 │   └── NIST-Frameworks/              → Risk assessment, NIST 800-30
-│
+|
+├── 05-05-CVE_CVSS_Vulnerability-Mgt/
+│   ├── Data_Center_Vulnerability_Assessment/    → Infrastructure Security Assessment, CVSS/CVE vulnerability risk scoring
+│   
 ├── 05-Certifications/
 │   ├── AZ-900-Azure-Fundamentals/    → Study notes, practice exams
 │   ├── Splunk-Core-Certified-User/   → Module summaries, quiz analysis
@@ -123,7 +126,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 ## 📊 Repository Stats
 
-**Last Updated:** January 4, 2026  
+**Last Updated:** January 13, 2026  
 **Commit Frequency:** Multiple commits per week  
 **Documentation Standard:** Harvard-style referencing, vendor documentation, industry standards  
 **Status:** Actively maintained throughout MSc program (Sep 2025 - Sep 2026)
