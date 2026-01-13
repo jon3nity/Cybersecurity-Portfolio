@@ -3,13 +3,12 @@
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/john-onyekachi/)
 [![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:your-jon3nity.oj@gmail.com)
-[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-4CAF50?style=for-the-badge&logo=google-chrome&logoColor=white)](your-portfolio-url)
 
 ---
 
-## 🎯 About This Repository
+## About This Repository
 
-This repository documents my hands-on cybersecurity learning journey during my **MSc Cybersecurity program** at ATU Letterkenny (September 2025 - September 2026).
+This repository documents my hands-on cybersecurity learning journey during my **MSc Cybersecurity program** at ATU Letterkenny (September 2025 - September 2026) and afterwards.
 
 **This is not a collection of tutorials.**  
 It is a record of real system behavior, structured reasoning, cause-effect-mitigation analysis, and evidence-based security decisions across networking, cloud infrastructure, SIEM operations, and governance frameworks.
@@ -22,7 +21,7 @@ It is a record of real system behavior, structured reasoning, cause-effect-mitig
 
 ---
 
-## 🧠 Security Philosophy
+## Security Philosophy
 
 > "Security is risk management, not just tool usage. Every vulnerability has a business impact, every control has a cost, and every decision requires evidence."
 
