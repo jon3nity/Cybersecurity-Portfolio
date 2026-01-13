@@ -122,9 +122,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 **Commit Frequency:** Multiple commits per week  
 **Documentation Standard:** Harvard-style referencing, vendor documentation, industry standards  
-**Status:** Actively maintained throughout the Cybersecurity MSc program
-
----
+**Status:** Actively maintained throughout the Cybersecurity MSc program and after graduation.
 
 
 ---
