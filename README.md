@@ -30,7 +30,7 @@ It is a record of real system behavior, structured reasoning, cause-effect-mitig
 2. **Document Failures as Learning** - Root cause analysis, alternative approaches, reasoning process
 3. **Security-First Thinking** - Threat modeling, detection capability, business impact assessment
 4. **Evidence-Based Decisions** - Traceable to logs, industry standards, hands-on verification
-5. **Progressive Complexity** - Master fundamentals before advancing to complex implementations
+5. **Progressive Complexity** - Master fundamentals before advancing to complex/enterprise-level implementations
 
 ---
 
@@ -73,26 +73,26 @@ CyberSecurity-MSc-Portfolio/
 
 ## 💡 Featured Work
 
-### 🌐 [Enterprise Network Architecture](./01-Networking-Fundamentals/)
+### [Enterprise Network Architecture](./01-Networking-Fundamentals/)
 3,220-device campus network with VLAN segmentation, OSPF routing, and security-conscious design. Demonstrates enterprise-scale networking and IP addressing mastery.
 
-### 📊 [SIEM Security Operations](./02-Security-Operations/Splunk-SIEM/)
+### [SIEM Security Operations](./02-Security-Operations/Splunk-SIEM/)
 Splunk SIEM configuration with custom SPL queries for brute force detection, scheduled alerts, and security dashboards. Real incident analysis and detection logic.
 
-### 📡 [Network Forensics](./02-Security-Operations/Wireshark-Analysis/)
+### [Network Forensics](./02-Security-Operations/Wireshark-Analysis/)
 Protocol-level packet analysis (ICMP, DNS, ARP) establishing traffic baselines and identifying anomalies for security monitoring.
 
-### ☁️ [Cloud Security](./03-Cloud-Security/Azure-Fundamentals/)
+### [Cloud Security](./03-Cloud-Security/Azure-Fundamentals/)
 Azure resource deployment with security groups, systematic troubleshooting, and infrastructure-as-code thinking aligned with AZ-900 certification.
 
-### 📋 [Compliance Frameworks](./04-Compliance-Governance/)
+### [Compliance Frameworks](./04-Compliance-Governance/)
 ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control mapping, and policy development using NIST 800-30 methodology.
 
 *See individual folder READMEs for detailed technical documentation, configurations, and learning notes.*
 
 ---
 
-## 🛠️ Technical Skills
+## Technical Skills
 
 **Operating Systems & Platforms:** Windows, Linux, Windows Server, Azure Cloud
 
@@ -100,7 +100,11 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 **Security Operations & Tools:** Wireshark (Packet Analysis), Splunk SIEM, Protocol Analysis, Cisco Packet Tracer, Azure Security Center, Firewall Configuration, Traffic Filtering 
 
+<<<<<<< HEAD
 **Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design  
+=======
+**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design 
+>>>>>>> a9dcc2bc60f5775ea37758449fb28c7f6dda6c8f
 
 **Compliance & GRC:** ISO 27001, GDPR, NIST 800-30, Risk Assessment, Control Mapping, CVSS Scoring  
 
