@@ -30,7 +30,7 @@ It is a record of real system behavior, structured reasoning, cause-effect-mitig
 2. **Document Failures as Learning** - Root cause analysis, alternative approaches, reasoning process
 3. **Security-First Thinking** - Threat modeling, detection capability, business impact assessment
 4. **Evidence-Based Decisions** - Traceable to logs, industry standards, hands-on verification
-5. **Progressive Complexity** - Master fundamentals before advancing to complex implementations
+5. **Progressive Complexity** - Master fundamentals before advancing to complex/enterprise-level implementations
 
 ---
 
