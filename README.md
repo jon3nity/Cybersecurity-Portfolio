@@ -95,12 +95,19 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 ## 🛠️ Technical Skills
 
 **Operating Systems & Platforms:** Windows, Linux, Windows Server, Azure Cloud
+
 **Networking & Infrastructure:** TCP/IP, Subnetting (VLSM/CIDR), VLAN Security, OSPF, RIP, Cisco IOS, Network Architecture, Routing & Switching, Collision/Broadcast Domains
+
 **Security Operations & Tools:** Wireshark (Packet Analysis), Splunk SIEM, Protocol Analysis, Cisco Packet Tracer, Azure Security Center, Firewall Configuration, Traffic Filtering 
+
 **Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design  
+
 **Compliance & GRC:** ISO 27001, GDPR, NIST 800-30, Risk Assessment, Control Mapping, CVSS Scoring  
+
 **Scripting:** Python, PowerShell, Bash, SPL Query Language
+
 **Methodologies:** Threat Modeling, Incident Detection, Root Cause Analysis, Evidence-Based Decision Making, Log Analysis, Network Forensics, Vulnerability Assessment, Security Architecture, Defense in Depth
+
 **Professional Competencies** Problem Solving, Technical Documentation, Analytical Thinking, Continuous Learning, Team Collaboration
 
 ---
