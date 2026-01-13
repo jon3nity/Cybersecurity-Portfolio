@@ -100,11 +100,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 **Security Operations & Tools:** Wireshark (Packet Analysis), Splunk SIEM, Protocol Analysis, Cisco Packet Tracer, Azure Security Center, Firewall Configuration, Traffic Filtering 
 
-<<<<<<< HEAD
-**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design  
-=======
-**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design 
->>>>>>> a9dcc2bc60f5775ea37758449fb28c7f6dda6c8f
+**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design
 
 **Compliance & GRC:** ISO 27001, GDPR, NIST 800-30, Risk Assessment, Control Mapping, CVSS Scoring  
 
