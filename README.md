@@ -34,7 +34,7 @@ It is a record of real system behavior, structured reasoning, cause-effect-mitig
 
 ---
 
-## 📚 Repository Structure & Navigation
+## Repository Structure & Navigation
 
 ```
 CyberSecurity-MSc-Portfolio/
@@ -99,26 +99,26 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 **Security Operations & Tools:** Wireshark (Packet Analysis), Splunk SIEM, Protocol Analysis, Cisco Packet Tracer, Azure Security Center, Firewall Configuration, Traffic Filtering 
 **Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design  
 **Compliance & GRC:** ISO 27001, GDPR, NIST 800-30, Risk Assessment, Control Mapping, CVSS Scoring  
-**Scripting:** Python, PowerShell, Bash, n8n Workflow Automation, SPL Query Language
+**Scripting:** Python, PowerShell, Bash, SPL Query Language
 **Methodologies:** Threat Modeling, Incident Detection, Root Cause Analysis, Evidence-Based Decision Making, Log Analysis, Network Forensics, Vulnerability Assessment, Security Architecture, Defense in Depth
 **Professional Competencies** Problem Solving, Technical Documentation, Analytical Thinking, Continuous Learning, Team Collaboration
 
 ---
 
-## 📈 Navigation Guide
+## Navigation Guide
 
-### 👔 For Recruiters & Hiring Managers
+### For Recruiters & Hiring Managers
 **What to Look For:** SIEM operations, compliance frameworks, hands-on labs
 
-### 🎓 For Cybersecurity Students
+### For Cybersecurity Students
 **Deep Dives:** Each folder README contains detailed configurations and learning notes
 
-### 🔍 For Technical Interviewers
+### For Technical Interviewers
 **Focus Areas:** [Compliance](./04-Compliance-Governance/) | [Security Operations](./02-Security-Operations/) | [Network Security](./01-Networking-Fundamentals/)
 
 ---
 
-## 📊 Repository Stats
+## Repository Stats
 
 **Commit Frequency:** Multiple commits per week  
 **Documentation Standard:** Harvard-style referencing, vendor documentation, industry standards  
@@ -130,8 +130,6 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 ---
 
 ## 💪 Commitment
-
-> "When I fail at something in cybersecurity, I don't move on—I rebuild it from scratch until I understand every layer."
 
 **Daily Practice:** Consistent learning, documented progress, hands-on experimentation  
 **Quality Standard:** Evidence-based claims, traceable sources, reproducible results  
