@@ -58,20 +58,17 @@ CyberSecurity-MSc-Portfolio/
 │   ├── GDPR-Compliance/              → Data protection, privacy by design
 │   └── NIST-Frameworks/              → Risk assessment, NIST 800-30
 |
-├── 05-05-CVE_CVSS_Vulnerability-Mgt/
-│   ├── Data_Center_Vulnerability_Assessment/    → Infrastructure Security Assessment, CVSS/CVE vulnerability risk scoring
+├── 05-CVE_CVSS_Vulnerability-Mgt/
+│   ├── Data Center Vulnerability Assessment/    → ATU Infrastructure Security Assessment, CVSS/CVE vulnerability risk scoring
 │   
-├── 05-Certifications/
+├── 06-Certifications/
 │   ├── AZ-900-Azure-Fundamentals/    → Study notes, practice exams
 │   ├── Splunk-Core-Certified-User/   → Module summaries, quiz analysis
 │   ├── CompTIA-Security-Plus/        → Preparation materials
-│   └── CompTIA-Network-Plus/         → Study resources
+│   └── CompTIA-Network-Plus/         
 │
-├── 06-CTF-Challenges/                → Capture The Flag competitions
-├── 07-Projects/                      → Major implementations
-├── 08-Tools-Configuration/           → Configs, scripts, references
-├── 09-Interview-Prep/                → Technical interview materials
-└── Resources/                        → Study guides, documentation
+├── 07-CTF-Challenges/                → Capture The Flag competitions
+└── 08-Projects/                      → Major implementations
 ```
 ---
 
@@ -112,11 +109,9 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 ## 📈 Navigation Guide
 
 ### 👔 For Recruiters & Hiring Managers
-**Quick Path:** [Featured Work] | [Technical Skills](#./11-Tools-Configuration/) | [Certifications](#./07-Certifications/)  
 **What to Look For:** SIEM operations, compliance frameworks, hands-on labs
 
 ### 🎓 For Cybersecurity Students
-**Start Here:** [Networking Fundamentals](./01-Networking-Fundamentals/) | [Tools](./11-Tools-Configuration/)  
 **Deep Dives:** Each folder README contains detailed configurations and learning notes
 
 ### 🔍 For Technical Interviewers
@@ -126,26 +121,12 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 ## 📊 Repository Stats
 
-**Last Updated:** January 13, 2026  
 **Commit Frequency:** Multiple commits per week  
 **Documentation Standard:** Harvard-style referencing, vendor documentation, industry standards  
-**Status:** Actively maintained throughout MSc program (Sep 2025 - Sep 2026)
+**Status:** Actively maintained throughout the Cybersecurity MSc program
 
 ---
 
-## ⭐ Support This Work
-
-If you find this repository valuable:
-- ⭐ Star this repository
-- 🔄 Share with fellow cybersecurity students
-- 🤝 Connect on LinkedIn
-- 💬 Provide feedback via Issues
-
----
-
-## 📜 License
-
-MIT License - Free to use for educational purposes with attribution.
 
 ---
 
@@ -161,4 +142,4 @@ MIT License - Free to use for educational purposes with attribution.
 
 *This repository represents applied cybersecurity knowledge built through systematic learning, hands-on practice, and evidence-based decision-making.*
 
-**Repository Version:** 1.0 | **Status:** Actively Maintained | **Last Updated:** January 4, 2026
+**Repository Version:** 1.0 | **Status:** Actively Maintained | **Last Updated:** January 13, 2026
