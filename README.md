@@ -73,34 +73,41 @@ CyberSecurity-MSc-Portfolio/
 
 ## 💡 Featured Work
 
-### 🌐 [Enterprise Network Architecture](./01-Networking-Fundamentals/)
+### [Enterprise Network Architecture](./01-Networking-Fundamentals/)
 3,220-device campus network with VLAN segmentation, OSPF routing, and security-conscious design. Demonstrates enterprise-scale networking and IP addressing mastery.
 
-### 📊 [SIEM Security Operations](./02-Security-Operations/Splunk-SIEM/)
+### [SIEM Security Operations](./02-Security-Operations/Splunk-SIEM/)
 Splunk SIEM configuration with custom SPL queries for brute force detection, scheduled alerts, and security dashboards. Real incident analysis and detection logic.
 
-### 📡 [Network Forensics](./02-Security-Operations/Wireshark-Analysis/)
+### [Network Forensics](./02-Security-Operations/Wireshark-Analysis/)
 Protocol-level packet analysis (ICMP, DNS, ARP) establishing traffic baselines and identifying anomalies for security monitoring.
 
-### ☁️ [Cloud Security](./03-Cloud-Security/Azure-Fundamentals/)
+### [Cloud Security](./03-Cloud-Security/Azure-Fundamentals/)
 Azure resource deployment with security groups, systematic troubleshooting, and infrastructure-as-code thinking aligned with AZ-900 certification.
 
-### 📋 [Compliance Frameworks](./04-Compliance-Governance/)
+### [Compliance Frameworks](./04-Compliance-Governance/)
 ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control mapping, and policy development using NIST 800-30 methodology.
 
 *See individual folder READMEs for detailed technical documentation, configurations, and learning notes.*
 
 ---
 
-## 🛠️ Technical Skills
+## Technical Skills
 
 **Operating Systems & Platforms:** Windows, Linux, Windows Server, Azure Cloud
+
 **Networking & Infrastructure:** TCP/IP, Subnetting (VLSM/CIDR), VLAN Security, OSPF, RIP, Cisco IOS, Network Architecture, Routing & Switching, Collision/Broadcast Domains
+
 **Security Operations & Tools:** Wireshark (Packet Analysis), Splunk SIEM, Protocol Analysis, Cisco Packet Tracer, Azure Security Center, Firewall Configuration, Traffic Filtering 
-**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design  
+
+**Cloud & Virtualization:** Microsoft Azure, Azure CLI, Resource Management, Virtual Machines, Cloud Security Groups, Infrastructure Design 
+
 **Compliance & GRC:** ISO 27001, GDPR, NIST 800-30, Risk Assessment, Control Mapping, CVSS Scoring  
+
 **Scripting:** Python, PowerShell, Bash, SPL Query Language
+
 **Methodologies:** Threat Modeling, Incident Detection, Root Cause Analysis, Evidence-Based Decision Making, Log Analysis, Network Forensics, Vulnerability Assessment, Security Architecture, Defense in Depth
+
 **Professional Competencies** Problem Solving, Technical Documentation, Analytical Thinking, Continuous Learning, Team Collaboration
 
 ---
