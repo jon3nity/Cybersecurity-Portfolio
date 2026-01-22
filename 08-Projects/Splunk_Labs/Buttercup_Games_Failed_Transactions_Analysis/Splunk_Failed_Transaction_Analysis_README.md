@@ -2,9 +2,9 @@
 
 ## Project Overview
 
-This project demonstrates advanced SIEM analysis using Splunk Enterprise to investigate server failures impacting business. The analysis examines failed e-commerce transactions at Buttercup Games, analyzing revenue loss, identifying occurence patterns, determining root causes, and providing actionable recommendations for infrastructure improvements. This work showcases skills directly applicable to SOC Analyst, Security Analyst, and Junior Security Engineer roles in cybersecurity.
+This project demonstrates advanced SIEM analysis using Splunk Enterprise to investigate server failures impacting business. The analysis examines failed e-commerce transactions at Buttercup Games, analyzing revenue loss, identifying occurence patterns, determining root causes, and providing actionable recommendations for infrastructure improvements. This work showcases skills directly applicable to SOC Analysis, Security Analysis, and Junior Security Engineer roles in cybersecurity.
 
-The dashboard provides organizational level visibility into server capacity issues while offering technical diagnostic capabilities for IT Operations teams. By combining business impact analysis with technical root cause investigation, this project demonstrates the dual perspective required in modern cybersecurity roles where analysts must communicate effectively with both technical and business stakeholders.
+The dashboard provides organizational level visibility into server capacity issues while providing technical diagnostic capabilities for IT Operations teams. By combining business impact analysis with technical root cause investigation, this project demonstrates the dual perspective required in modern cybersecurity roles where analysts must communicate effectively with both technical and business stakeholders.
 
 ## Business Context
 
@@ -52,7 +52,7 @@ sourcetype="access_combined_wcookie" status!=200 | timechart count span=1h
 ```
 
 Visualization: 📈 Line chart showing failure rate trends | 
-Key Finding: During peak traffic hours (evenings/nights), failure rates fluctuate regularly between (100–200 fail/hour) with occasional large spikes of (250–300/hour).
+Key Finding: During peak traffic hours (evenings/nights), failure rates fluctuate regularly between (100-200 fail/hour) with occasional large spikes of (250-300/hour).
 
 Technical Note: This panel intentionally excludes action=purchase filter to capture all HTTP errors across the application, providing broader infrastructure health visibility than just transaction failures.
 
@@ -95,13 +95,13 @@ Understood and showed that lookup enrichment happens at search time rather than 
 Analyzed the difference between using the top command (quick frequency analysis) versus the more flexible stats+eval+sort+head pipeline. The 'top' command cannot perform calculations like revenue multiplication, making the longer pipeline necessary when aggregations require computed fields. This demonstrates understanding of when to use convenience commands versus building custom aggregation logic.
 
 ### HTTP Status Code Analysis for Root Cause Determination
-Applied systematic diagnostic method by filtering  error types to distinguish between client-side issues (4xx), server-side failures (5xx), and redirects (3xx). The dominance of 503 errors shows infrastructure capacity problems rather than application defects, guiding the solution strategy toward scaling solutions instead of code debugging.
+Applied systematic diagnostic method by filtering  error types to differentiate between client-side issues (4xx), server-side failures (5xx), and redirects (3xx). The dominance of 503 errors shows infrastructure capacity problems rather than application issues, thereby guiding the solution strategy toward scaling solutions instead of code debugging.
 
 ### Dashboard Design for Multi-Stakeholder Audiences
 Structured the dashboard to serve both executive and technical audiences simultaneously. Single value metrics provide immediate business impact visibility for leadership, while detailed technical berakdowns support IT Operations troubleshooting. Panel descriptions and clear labeling ensure non-technical stakeholders can interpret findings without assistance.
 
 ### Error Pattern Recognition
-Identified link between failure rates and peak traffic periods through time-series analysis. The consistent hourly baseline with predictable spikes indicated capacity constraints rather than security threats. This pattern recognition skill is essential for distinguishing between random failures, sustained capacity issues, and potential security incidents like DDoS attacks.
+Through time-series analysis, failure rates were found to be related to peak traffic times. The consistent hourly baseline with predictable spikes indicated capacity constraints rather than security threats. This pattern recognition skill is essential for distinguishing between random failures, sustained capacity issues, and potential security incidents like DDoS attacks.
 
 ## Business Impact and Recommendations
 
@@ -119,7 +119,7 @@ Identified link between failure rates and peak traffic periods through time-seri
 3. Establish real-time monitoring alerts for sustained 503 error rates above threshold
 
 **ROI Justification:**
-With EUR 33,707 lost in 10 days, infrastructure improvements costing EUR 50,000-100,000 should achieve payback within 2-3 months while supporting business growth and improving customer experience.
+With EUR 33,707 lost in 10 days, infrastructure improvements costing EUR 50,000-100,000 should pay back within 2-3 months while supporting business growth and improving customer experience.
 
 ## Skills Demonstrated for Cybersecurity
 
@@ -132,15 +132,13 @@ With EUR 33,707 lost in 10 days, infrastructure improvements costing EUR 50,000-
 - Dashboard design and visualization selection for effective data presentation
 
 ### Analytical Methodologies
-- Hypothesis formation and actual testing (predicted 500 errors, data showed 503 dominance)
 - Root cause analysis using systematic diagnostic approach
 - Business impact calcaulation by combining technical metrics with financial data
-- Temporal pattern recognition for distinguishing incident types
-- Multi-perspective analysis benefiting both technical and business stakeholders
+- Multi-perspective analysis to help both technical and business stakeholders understand the issue
 
 ### Business Communication
 - Executive summary presentation with clear ROI calculations
-- Technical documentation suitable for IT Operations handover
+- Appropriate technical documents for IT Operations handover
 - Selection and marking of visualizations suitable for stakeholders
 - Actionable recommendation development with implementation priorities
 
@@ -186,9 +184,9 @@ Potential extensions to demonstrate additional capabilities:
 
 1. Implement scheduled searches with email alerting when failure rates exceed thresholds
 2. Add geolocation analysis to identify if failures correlate with specific regions
-3. Create comparison dashboard showing before/after metrics post-infrastructure improvements
-4. Develop predictive analytics to forecast when capacity constraints will occur
-5. Integrate with ticketing systems for automated incident creation
+3. Create comparison dashboard showing before/after metrics for post-infrastructure improvements
+4. Develop predictive analysis to predict when capacity constraints will occur
+5. Integrate with ticketing systems for automatically generated incidents
 
 ## Author
 
