@@ -21,10 +21,6 @@ It is a record of real system behavior, structured reasoning, cause-effect-mitig
 
 ---
 
-## Security Philosophy
-
-> "Security is risk management, not just tool usage. Every vulnerability has a business impact, every control has a cost, and every decision requires evidence."
-
 ### Core Principles
 1. **Understand the "Why" Before the "How"** - System behavior, attack vectors, mitigation strategies
 2. **Document Failures as Learning** - Root cause analysis, alternative approaches, reasoning process
