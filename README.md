@@ -42,7 +42,7 @@ CyberSecurity-MSc-Portfolio/
 │   └── Campus-Network-Design/        → 3,220-device enterprise architecture
 │
 ├── 02-Security-Operations/
-│   ├── Wireshark-Analysis/           → Protocol forensics, traffic analysis
+│   ├── Wireshark-Analysis/           → ARP-Protocol, DNS-Query Forensics, ICMP traffic analysis
 │   └── Splunk-SIEM/                  → SPL queries, dashboards, incident detection
 │
 ├── 03-Cloud-Security/
