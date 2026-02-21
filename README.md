@@ -46,7 +46,7 @@ CyberSecurity-MSc-Portfolio/
 │   └── Splunk-SIEM/                  → SPL queries, dashboards, incident detection
 │
 ├── 03-Cloud-Security/
-│   └── Azure-Fundamentals/           → AZ-900, VM deployment, security groups
+│   └── Azure-Fundamentals/           → VM deployment, security groups
 │
 ├── 04-Compliance-Governance/
 │   ├── ISO-27001/                    → ISMS implementation, control mapping
@@ -57,10 +57,10 @@ CyberSecurity-MSc-Portfolio/
 │   ├── Data Center Vulnerability Assessment/    → ATU Infrastructure Security Assessment, CVSS/CVE vulnerability risk scoring
 │   
 ├── 06-Certifications/
-│   ├── AZ-900-Azure-Fundamentals/    → Study notes, practice exams
-│   ├── Splunk-Core-Certified-User/   → Module summaries, quiz analysis
-│   ├── CompTIA-Security-Plus/        → Preparation materials
-│   └── CompTIA-Network-Plus/         
+│   ├── AZ-900-Azure-Fundamentals/   
+│   ├── Splunk-Core-Certified-User/
+│   ├── CompTIA-Security-Plus/
+│   └── CompTIA-Network-Plus/
 │
 ├── 07-CTF-Challenges/                → Capture The Flag competitions
 └── 08-Projects/                      → Major implementations
@@ -134,7 +134,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 **Daily Practice:** Consistent learning, documented progress, hands-on experimentation  
 **Quality Standard:** Evidence-based claims, traceable sources, reproducible results  
-**Goal:** Become one of Ireland's top entry-level cybersecurity professionals
+**Goal:** Become one of the top cybersecurity professionals
 
 ---
 
