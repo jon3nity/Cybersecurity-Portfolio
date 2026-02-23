@@ -1,0 +1,140 @@
+<!--
+================================================================================
+INCIDENT TIMELINE DASHBOARD — Event Reconstruction Panel
+================================================================================
+Purpose:  Enables IR analysts to reconstruct the chronological sequence
+          of events for a specific incident, tracing attacker actions
+          from initial access through lateral movement to exfiltration.
+Install:  Splunk → Settings → Dashboards → Import XML
+Index:    attack_sim
+================================================================================
+-->
+<dashboard version="1.1" theme="dark">
+  <label>Incident Timeline</label>
+  <description>Chronological event reconstruction for incident response investigations</description>
+
+  <fieldset submitButton="true" autoRun="false">
+    <input type="text" token="investigation_ip" searchWhenChanged="false">
+      <label>Investigate Source IP</label>
+      <default>185.220.101.42</default>
+    </input>
+    <input type="time" token="time_range" searchWhenChanged="false">
+      <label>Investigation Window</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <!-- ── Row 1: Investigation Summary ──────────────────── -->
+  <row>
+    <panel>
+      <title>Investigation Subject: $investigation_ip$</title>
+      <table>
+        <search>
+          <query>
+            index=attack_sim src_ip="$investigation_ip$"
+            | stats
+                count AS total_events,
+                count(eval(is_malicious="True")) AS malicious_events,
+                dc(hostname) AS hosts_touched,
+                dc(event_type) AS event_types,
+                values(mitre_technique) AS techniques_used,
+                values(mitre_tactic) AS tactics_observed,
+                earliest(_time) AS first_seen,
+                latest(_time) AS last_seen
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ── Row 2: Chronological Event Timeline ───────────── -->
+  <row>
+    <panel>
+      <title>Chronological Event Timeline</title>
+      <table>
+        <search>
+          <query>
+            index=attack_sim src_ip="$investigation_ip$"
+            | eval
+                severity_label = case(
+                    severity=2, "CRITICAL",
+                    severity=3, "HIGH",
+                    severity=4, "MEDIUM",
+                    severity=6, "INFO",
+                    1=1, "UNKNOWN"
+                ),
+                action_summary = coalesce(attack_type, event_type) . " → " . hostname
+            | table _time, event_type, hostname, dst_ip, username, action,
+                    severity_label, mitre_technique, mitre_tactic, message
+            | sort _time
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">row</option>
+        <option name="count">50</option>
+        <option name="wrap">true</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ── Row 3: Host Access Pattern ────────────────────── -->
+  <row>
+    <panel>
+      <title>Hosts Accessed by $investigation_ip$ (Timeline)</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim src_ip="$investigation_ip$"
+            | timechart span=5m count BY hostname
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>MITRE Tactic Progression</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim src_ip="$investigation_ip$" mitre_tactic=*
+            | timechart span=10m count BY mitre_tactic
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ── Row 4: Data Transfer Analysis ─────────────────── -->
+  <row>
+    <panel>
+      <title>Data Transfer Volume from $investigation_ip$</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim src_ip="$investigation_ip$" bytes_out=*
+            | eval mb_out = round(bytes_out / 1048576, 2)
+            | timechart span=30m sum(mb_out) AS total_mb_out
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.axisTitleY.text">MB Transferred Out</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>

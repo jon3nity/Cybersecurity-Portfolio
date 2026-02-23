@@ -1,0 +1,174 @@
+<!--
+================================================================================
+THREAT HUNTING DASHBOARD — Analyst Deep-Dive Panel
+================================================================================
+Purpose:  Provides SOC analysts with interactive drill-down capabilities
+          for investigating alerts and hunting for unknown threats.
+Install:  Splunk → Settings → User Interface → Dashboards → Import
+Index:    attack_sim
+================================================================================
+-->
+<dashboard version="1.1" theme="dark">
+  <label>Threat Hunting Dashboard</label>
+  <description>Analyst deep-dive panel for investigating security events and hunting threats</description>
+
+  <!-- ── Time Range Picker ─────────────────────────────── -->
+  <fieldset submitButton="true" autoRun="true">
+    <input type="time" token="time_range" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="src_ip_filter" searchWhenChanged="true">
+      <label>Source IP Filter</label>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <search>
+        <query>index=attack_sim | stats count BY src_ip | sort -count | head 20</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <fieldForLabel>src_ip</fieldForLabel>
+      <fieldForValue>src_ip</fieldForValue>
+    </input>
+    <input type="dropdown" token="severity_filter" searchWhenChanged="true">
+      <label>Severity</label>
+      <choice value="*">All</choice>
+      <choice value="2">Critical</choice>
+      <choice value="3">High</choice>
+      <choice value="4">Medium</choice>
+      <choice value="6">Informational</choice>
+      <default>*</default>
+    </input>
+  </fieldset>
+
+  <!-- ── Row 1: Top Attackers and Attack Types ─────────── -->
+  <row>
+    <panel>
+      <title>Top Source IPs by Malicious Event Count</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True src_ip=$src_ip_filter$
+            | stats count AS events BY src_ip
+            | sort -events
+            | head 10
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Attack Type Distribution</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True
+            | stats count BY attack_type
+            | sort -count
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.drilldown">all</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ── Row 2: Event Timeline ─────────────────────────── -->
+  <row>
+    <panel>
+      <title>Malicious Events Over Time</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True src_ip=$src_ip_filter$
+            | timechart span=15m count BY event_type
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ── Row 3: MITRE ATTACK Technique Hits ────────────── -->
+  <row>
+    <panel>
+      <title>MITRE ATTACK Technique Activity</title>
+      <table>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True mitre_technique=*
+            | stats count AS hits,
+                dc(src_ip) AS unique_sources,
+                dc(hostname) AS targets,
+                latest(_time) AS last_seen
+              BY mitre_technique, mitre_tactic
+            | eval last_seen = strftime(last_seen, "%Y-%m-%d %H:%M:%S")
+            | sort -hits
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">row</option>
+        <option name="count">20</option>
+      </table>
+    </panel>
+  </row>
+
+  <!-- ── Row 4: Raw Event Drill-Down ───────────────────── -->
+  <row>
+    <panel>
+      <title>Raw Security Events (Filtered)</title>
+      <event>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True src_ip=$src_ip_filter$ severity=$severity_filter$
+            | sort -_time
+            | head 100
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="list.drilldown">full</option>
+        <option name="count">20</option>
+      </event>
+    </panel>
+  </row>
+
+  <!-- ── Row 5: Statistical Outlier Detection ──────────── -->
+  <row>
+    <panel>
+      <title>Statistical Outliers — Hosts with Unusual Activity Volume</title>
+      <table>
+        <search>
+          <query>
+            index=attack_sim
+            | bin _time span=1h
+            | stats count AS hourly_events BY hostname, _time
+            | eventstats avg(hourly_events) AS avg_events, stdev(hourly_events) AS stdev_events BY hostname
+            | eval z_score = round((hourly_events - avg_events) / max(stdev_events, 1), 2)
+            | where z_score > 2
+            | sort -z_score
+            | table _time, hostname, hourly_events, avg_events, stdev_events, z_score
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="drilldown">row</option>
+        <option name="count">10</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

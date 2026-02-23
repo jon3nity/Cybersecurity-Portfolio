@@ -1,0 +1,88 @@
+`comment("
+================================================================================
+LATERAL MOVEMENT DETECTION — SPL Correlation Search
+================================================================================
+MITRE ATT&CK: T1021 — Remote Services (Lateral Movement)
+Sub-techniques: T1021.001 (RDP), T1021.002 (SMB), T1021.004 (SSH)
+Severity: HIGH
+Data Source: sourcetype=attack_sim:auth
+
+DETECTION LOGIC:
+  Detects attacker pivoting between hosts after initial compromise:
+  1. Single source IP authenticating to 3+ unique hosts rapidly
+  2. Sequential host hopping (A→B then B→C then C→D)
+  3. RDP/SMB access from non-admin workstations to servers
+  4. Unusual internal-to-internal connection patterns
+
+TUNING GUIDANCE:
+  - Whitelist: IT admin jump boxes, vulnerability scanners, SCCM/WSUS
+  - Threshold: 3 hosts in 30 min is sensitive; adjust for IT ops team
+  - False positives: Deployment tools, monitoring agents, file server
+    access patterns, print server connections
+================================================================================
+")`
+
+`comment("--- SEARCH 1: Multi-Host Authentication Sweep ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+| where cidrmatch("10.0.0.0/8", src_ip) OR cidrmatch("192.168.0.0/16", src_ip)
+| bin _time span=30m
+| stats
+    dc(dst_ip) AS unique_targets,
+    dc(hostname) AS unique_hosts,
+    values(hostname) AS target_list,
+    values(username) AS usernames_used,
+    count AS total_connections,
+    earliest(_time) AS first_hop,
+    latest(_time) AS last_hop
+    BY src_ip, _time
+| where unique_targets >= 3
+| eval
+    time_delta_min = round((strptime(last_hop, "%Y-%m-%dT%H:%M:%S") - strptime(first_hop, "%Y-%m-%dT%H:%M:%S")) / 60, 1),
+    severity = if(unique_targets >= 5, "critical", "high"),
+    mitre_technique = "T1021",
+    alert_name = "Lateral Movement: " . src_ip . " accessed " . unique_targets . " hosts in 30 min"
+| table first_hop, last_hop, src_ip, unique_targets, target_list, usernames_used, total_connections, severity, alert_name
+| sort - unique_targets
+
+
+`comment("--- SEARCH 2: Server-to-Server Lateral Movement (Unusual Patterns) ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+| eval
+    src_is_server = if(cidrmatch("10.0.2.0/24", src_ip), 1, 0),
+    dst_is_server = if(cidrmatch("10.0.2.0/24", dst_ip), 1, 0)
+| where src_is_server=1 AND dst_is_server=1 AND src_ip!=dst_ip
+| eval
+    severity = "high",
+    mitre_technique = "T1021",
+    alert_name = "Server-to-Server lateral movement: " . src_ip . " → " . dst_ip . " (" . username . ")"
+| stats
+    count AS connections,
+    dc(dst_ip) AS unique_targets,
+    values(hostname) AS target_hosts,
+    values(username) AS accounts_used
+    BY src_ip
+| where connections >= 2
+| table _time, src_ip, unique_targets, target_hosts, accounts_used, connections, alert_name
+
+
+`comment("--- SEARCH 3: Workstation-to-Server RDP/SMB Access ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+    (protocol="rdp" OR protocol="smb")
+| eval
+    src_is_workstation = if(cidrmatch("10.0.1.0/24", src_ip), 1, 0),
+    dst_is_server = if(cidrmatch("10.0.2.0/24", dst_ip), 1, 0),
+    src_is_admin_ws = if(cidrmatch("192.168.1.0/24", src_ip), 1, 0)
+| where src_is_workstation=1 AND dst_is_server=1 AND src_is_admin_ws=0
+| eval
+    severity = "high",
+    mitre_technique = "T1021.001",
+    alert_name = "Non-admin workstation " . src_ip . " accessed server " . dst_ip . " via " . protocol
+| stats
+    count AS access_attempts,
+    values(hostname) AS servers_accessed,
+    values(username) AS accounts
+    BY src_ip, protocol
+| table _time, src_ip, protocol, access_attempts, servers_accessed, accounts, alert_name

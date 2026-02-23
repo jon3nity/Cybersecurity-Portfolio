@@ -1,0 +1,124 @@
+`comment("
+================================================================================
+PRIVILEGE ESCALATION DETECTION — SPL Correlation Search
+================================================================================
+MITRE ATT&CK: T1078 — Valid Accounts (Privilege Escalation)
+Related: T1078.001 (Default Accounts), T1078.003 (Local Accounts)
+Severity: CRITICAL
+Data Source: sourcetype=attack_sim:auth
+
+DETECTION LOGIC:
+  Identifies privilege escalation indicators:
+  1. Login to admin/service accounts from non-admin source IPs
+  2. Unusual time-of-day access for privileged accounts
+  3. Multiple privilege level changes in a short window
+  4. First-time access patterns for high-privilege accounts
+
+TUNING GUIDANCE:
+  - Define known admin workstations in the lookup table
+  - Set business hours for your timezone (default: 08:00-18:00 UTC)
+  - Whitelist: IT ops team IPs, change management windows, DR tests
+  - False positives: On-call admins working off-hours, new IT hires
+================================================================================
+")`
+
+`comment("--- SEARCH 1: Privileged Account Access from Non-Admin Source ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+| eval is_privileged = if(
+    match(username, "(?i)(admin|root|administrator|sysadmin|service_account|backup|deploy)"),
+    1, 0
+)
+| where is_privileged=1
+| eval
+    is_internal_admin = if(
+        cidrmatch("192.168.1.0/24", src_ip) OR cidrmatch("10.0.2.0/24", src_ip),
+        1, 0
+    ),
+    is_external = if(NOT cidrmatch("10.0.0.0/8", src_ip) AND NOT cidrmatch("192.168.0.0/16", src_ip), 1, 0)
+| where is_internal_admin=0
+| eval
+    severity = if(is_external=1, "critical", "high"),
+    mitre_technique = "T1078",
+    alert_name = "Privileged Account Access from Unusual Source: " . username . "@" . src_ip
+| stats
+    count AS access_count,
+    values(hostname) AS target_hosts,
+    latest(_time) AS last_seen
+    BY src_ip, username, severity
+| table last_seen, src_ip, username, access_count, target_hosts, severity, alert_name
+
+
+`comment("--- SEARCH 2: Off-Hours Privileged Access ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+| eval is_privileged = if(
+    match(username, "(?i)(admin|root|administrator|sysadmin|service_account)"),
+    1, 0
+)
+| where is_privileged=1
+| eval
+    hour = strftime(_time, "%H"),
+    day_of_week = strftime(_time, "%u"),
+    is_off_hours = if((hour < 8 OR hour > 18) OR (day_of_week > 5), 1, 0)
+| where is_off_hours=1
+| eval
+    severity = "high",
+    time_context = if(day_of_week > 5, "weekend", "after-hours"),
+    alert_name = "Off-Hours Privileged Access: " . username . " at " . strftime(_time, "%H:%M") . " (" . time_context . ")"
+| stats
+    count AS off_hours_logins,
+    values(hostname) AS target_hosts,
+    values(time_context) AS time_contexts
+    BY src_ip, username
+| where off_hours_logins >= 2
+| table _time, src_ip, username, off_hours_logins, target_hosts, time_contexts, alert_name
+
+
+`comment("--- SEARCH 3: First-Time Privileged Account Usage ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+    earliest=-1h latest=now
+| eval is_privileged = if(
+    match(username, "(?i)(admin|root|administrator|sysadmin)"),
+    1, 0
+)
+| where is_privileged=1
+| eval current_pair = src_ip . "→" . username
+| join type=left current_pair
+    [search index=attack_sim sourcetype="attack_sim:auth" action="success"
+        earliest=-30d latest=-1h
+    | eval current_pair = src_ip . "→" . username
+    | stats count AS historical_count BY current_pair]
+| where isnull(historical_count) OR historical_count=0
+| eval
+    severity = "critical",
+    mitre_technique = "T1078",
+    alert_name = "FIRST-TIME privileged access: " . username . " from " . src_ip . " (never seen in 30 days)"
+| table _time, src_ip, username, hostname, alert_name, severity
+
+
+`comment("--- SEARCH 4: Multiple Privilege Level Changes in a Short Window ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="success"
+| eval priv_level = case(
+    match(username, "(?i)(root|administrator|sysadmin)"),      "high",
+    match(username, "(?i)(admin|service_account|backup|deploy)"), "medium",
+    true(),                                                        "low"
+)
+| bin _time span=15m
+| stats
+    dc(priv_level)       AS distinct_priv_levels,
+    values(priv_level)   AS priv_levels_accessed,
+    dc(username)         AS unique_accounts,
+    values(username)     AS accounts_used,
+    count                AS total_logins,
+    latest(_time)        AS last_seen
+    BY src_ip, _time
+| where distinct_priv_levels >= 2
+| eval
+    severity         = if(distinct_priv_levels >= 3, "critical", "high"),
+    mitre_technique  = "T1078",
+    alert_name       = "Privilege Escalation Pattern: " . src_ip . " accessed " . distinct_priv_levels . " privilege levels in 15 min"
+| table last_seen, src_ip, distinct_priv_levels, priv_levels_accessed, accounts_used, total_logins, severity, mitre_technique, alert_name
+| sort - distinct_priv_levels

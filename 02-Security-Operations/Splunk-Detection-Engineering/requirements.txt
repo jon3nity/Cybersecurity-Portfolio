@@ -1,0 +1,9 @@
+# Splunk Detection Engineering Lab — Dependencies
+# Python 3.9+
+
+faker>=22.0.0            # Realistic fake data generation (IPs, usernames, URLs)
+requests>=2.31.0         # HTTP client for Splunk HEC integration
+argparse                 # CLI argument parsing (stdlib, listed for clarity)
+colorama>=0.4.6          # Colored terminal output for status messages
+jinja2>=3.1.3            # Template rendering for log format generation
+python-dateutil>=2.8.2   # Advanced datetime manipulation for log timestamps

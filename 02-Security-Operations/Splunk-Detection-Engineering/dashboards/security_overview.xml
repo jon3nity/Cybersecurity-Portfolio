@@ -1,0 +1,163 @@
+<!--
+================================================================================
+SECURITY OVERVIEW DASHBOARD — Executive KPI Panel
+================================================================================
+Purpose:  High-level security posture view for management and SOC leads.
+          Shows alert trends, severity distribution, and response metrics.
+Install:  Splunk → Settings → Dashboards → Import XML
+Index:    attack_sim
+================================================================================
+-->
+<dashboard version="1.1" theme="dark">
+  <label>Security Overview</label>
+  <description>Executive-level security posture and alert trend dashboard</description>
+
+  <fieldset submitButton="false" autoRun="true">
+    <input type="time" token="time_range" searchWhenChanged="true">
+      <label>Time Range</label>
+      <default>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+  </fieldset>
+
+  <!-- ── Row 1: KPI Single-Value Panels ────────────────── -->
+  <row>
+    <panel>
+      <title>Total Security Events</title>
+      <single>
+        <search>
+          <query>index=attack_sim | stats count</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xdc4e41"]</option>
+        <option name="rangeValues">[1000,5000]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Malicious Events</title>
+      <single>
+        <search>
+          <query>index=attack_sim is_malicious=True | stats count</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x53a051","0xf8be34","0xdc4e41"]</option>
+        <option name="rangeValues">[100,500]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Unique Attacker IPs</title>
+      <single>
+        <search>
+          <query>index=attack_sim is_malicious=True | stats dc(src_ip) AS unique_attackers</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>Critical Alerts</title>
+      <single>
+        <search>
+          <query>index=attack_sim severity&lt;=3 is_malicious=True | stats count</query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="colorMode">block</option>
+        <option name="rangeColors">["0x53a051","0xdc4e41"]</option>
+        <option name="rangeValues">[10]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+
+  <!-- ── Row 2: Trend Lines ────────────────────────────── -->
+  <row>
+    <panel>
+      <title>Security Event Trend (Benign vs Malicious)</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim
+            | eval category = if(is_malicious="True", "Malicious", "Benign")
+            | timechart span=1h count BY category
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.stackMode">stacked</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ── Row 3: Severity Distribution and Attack Types ─── -->
+  <row>
+    <panel>
+      <title>Alert Severity Distribution</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True
+            | eval severity_label = case(
+                severity=2, "Critical",
+                severity=3, "High",
+                severity=4, "Medium",
+                severity=6, "Informational",
+                1=1, "Unknown"
+              )
+            | stats count BY severity_label
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Top Targeted Hosts</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True
+            | stats count BY hostname
+            | sort -count
+            | head 5
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+      </chart>
+    </panel>
+  </row>
+
+  <!-- ── Row 4: MITRE ATTACK Tactic Summary ───────────── -->
+  <row>
+    <panel>
+      <title>MITRE ATTACK Tactic Activity</title>
+      <chart>
+        <search>
+          <query>
+            index=attack_sim is_malicious=True mitre_tactic=*
+            | stats count BY mitre_tactic
+            | sort -count
+          </query>
+          <earliest>$time_range.earliest$</earliest>
+          <latest>$time_range.latest$</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.chart.showDataLabels">all</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>

@@ -1,0 +1,86 @@
+`comment("
+================================================================================
+BRUTE FORCE DETECTION — SPL Correlation Search
+================================================================================
+MITRE ATT&CK: T1110 — Brute Force (Credential Access)
+Sub-techniques: T1110.001 (Password Guessing), T1110.003 (Password Spraying)
+Severity: HIGH
+Data Source: sourcetype=attack_sim:auth
+
+DETECTION LOGIC:
+  Identifies source IPs generating 10+ authentication failures within a
+  5-minute window against any single destination host. A secondary check
+  flags cases where a successful login follows a failure burst (potential
+  compromise).
+
+TUNING GUIDANCE:
+  - Threshold: 10 failures in 5 min is aggressive. Production SOCs may
+    set 20-50 depending on VPN/citrix noise.
+  - Whitelist: Add known vulnerability scanners, SSO health checks, and
+    service accounts to the NOT filter below.
+  - False positives: AD password expiry, locked accounts generating
+    automated retries, password managers syncing.
+================================================================================
+")`
+
+`comment("--- SEARCH 1: Brute Force Threshold Detection ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="failure"
+| bin _time span=5m
+| stats
+    count AS failure_count,
+    dc(username) AS targeted_accounts,
+    values(username) AS attempted_usernames,
+    earliest(_time) AS first_attempt,
+    latest(_time) AS last_attempt
+    BY src_ip, dst_ip, hostname
+| where failure_count >= 10
+| eval
+    attack_type = if(targeted_accounts > 5, "password_spraying", "brute_force"),
+    mitre_technique = if(targeted_accounts > 5, "T1110.003", "T1110.001"),
+    severity = if(failure_count > 50, "critical", "high"),
+    alert_name = "Brute Force Detected: " . src_ip . " → " . hostname,
+    attempts_per_min = round(failure_count / 5, 1)
+| table
+    first_attempt, last_attempt, src_ip, dst_ip, hostname,
+    failure_count, targeted_accounts, attempted_usernames,
+    attack_type, mitre_technique, severity, attempts_per_min, alert_name
+| sort - failure_count
+
+
+`comment("--- SEARCH 2: Successful Login After Failure Burst (Compromise Indicator) ---")`
+
+index=attack_sim sourcetype="attack_sim:auth"
+| bin _time span=10m
+| stats
+    count(eval(action="failure")) AS failures,
+    count(eval(action="success")) AS successes,
+    values(username) AS users,
+    latest(action) AS last_action,
+    latest(_time) AS last_event_time
+    BY src_ip, dst_ip
+| where failures >= 5 AND successes >= 1 AND last_action="success"
+| eval
+    severity = "critical",
+    alert_name = "POTENTIAL COMPROMISE: Success after " . failures . " failures from " . src_ip,
+    mitre_technique = "T1110"
+| table last_event_time, src_ip, dst_ip, failures, successes, users, alert_name, severity
+
+
+`comment("--- SEARCH 3: Password Spraying Detection (one password, many accounts) ---")`
+
+index=attack_sim sourcetype="attack_sim:auth" action="failure"
+| bin _time span=15m
+| stats
+    dc(username) AS unique_users_targeted,
+    count AS total_attempts,
+    dc(dst_ip) AS targeted_hosts,
+    values(hostname) AS target_hosts
+    BY src_ip
+| where unique_users_targeted >= 10 AND total_attempts >= 15
+| eval
+    spray_ratio = round(unique_users_targeted / total_attempts, 2),
+    severity = "high",
+    mitre_technique = "T1110.003",
+    alert_name = "Password Spraying: " . src_ip . " targeted " . unique_users_targeted . " accounts"
+| table _time, src_ip, unique_users_targeted, total_attempts, targeted_hosts, target_hosts, spray_ratio, alert_name

@@ -1,0 +1,87 @@
+`comment("
+================================================================================
+SQL INJECTION DETECTION — SPL Correlation Search
+================================================================================
+MITRE ATT&CK: T1190 — Exploit Public-Facing Application (Initial Access)
+Severity: CRITICAL
+Data Source: sourcetype=attack_sim:web
+
+DETECTION LOGIC:
+  Three-layer detection approach:
+  1. Signature-based: Regex patterns matching known SQLi payloads
+  2. Behavioral: Anomalous HTTP 500 error rate from single source
+  3. Combined: Both signature hit + error spike (high confidence)
+
+TUNING GUIDANCE:
+  - WAF logs already block most SQLi — this catches what gets through
+  - Whitelist: Internal security scanners, QA automation, pentest IPs
+  - False positives: Developer debug queries, URL-encoded legitimate
+    search terms, CMS admin panels with complex query params
+================================================================================
+")`
+
+`comment("--- SEARCH 1: Signature-Based SQLi Detection ---")`
+
+index=attack_sim sourcetype="attack_sim:web"
+| eval url_decoded = urldecode(url)
+| where
+    match(url_decoded, "(?i)(union\s+(all\s+)?select|select\s+.*from\s+|insert\s+into|delete\s+from|drop\s+table|update\s+.*set)")
+    OR match(url_decoded, "(?i)('|\"|;)\s*(or|and)\s+('|\"|[0-9]).*=")
+    OR match(url_decoded, "(?i)(xp_cmdshell|information_schema|sys\.objects|benchmark\(|sleep\(|waitfor\s+delay)")
+    OR match(url_decoded, "(?i)(--\s*$|/\*.*\*/|#\s*$)")
+| eval
+    sqli_type = case(
+        match(url_decoded, "(?i)union.*select"), "UNION-based",
+        match(url_decoded, "(?i)(sleep|benchmark|waitfor)"), "Time-based blind",
+        match(url_decoded, "(?i)(or|and).*="), "Boolean-based",
+        match(url_decoded, "(?i)xp_cmdshell"), "Stacked query (RCE risk)",
+        1=1, "Generic SQLi"
+    ),
+    severity = if(match(url_decoded, "(?i)(xp_cmdshell|drop\s+table|delete\s+from)"), "critical", "high"),
+    mitre_technique = "T1190",
+    alert_name = "SQL Injection Attempt: " . sqli_type . " from " . src_ip
+| stats
+    count AS attempts,
+    dc(url) AS unique_payloads,
+    values(sqli_type) AS attack_types,
+    values(status_code) AS response_codes,
+    earliest(_time) AS first_seen,
+    latest(_time) AS last_seen
+    BY src_ip, dst_ip, hostname
+| where attempts >= 3
+| table first_seen, last_seen, src_ip, hostname, attempts, unique_payloads, attack_types, response_codes, severity
+
+
+`comment("--- SEARCH 2: HTTP Error Anomaly (SQLi Causing Server Errors) ---")`
+
+index=attack_sim sourcetype="attack_sim:web" (status_code>=500 OR status_code=403)
+| bin _time span=5m
+| stats
+    count AS error_count,
+    dc(url) AS unique_urls,
+    values(status_code) AS error_codes
+    BY src_ip, hostname, _time
+| where error_count >= 10
+| eval
+    severity = if(error_count > 30, "critical", "high"),
+    alert_name = "HTTP Error Spike: " . src_ip . " caused " . error_count . " errors in 5 min"
+| table _time, src_ip, hostname, error_count, unique_urls, error_codes, severity, alert_name
+
+
+`comment("--- SEARCH 3: Automated Scanner Detection (User-Agent + Volume) ---")`
+
+index=attack_sim sourcetype="attack_sim:web"
+| where match(user_agent, "(?i)(sqlmap|nikto|burp|acunetix|nessus|w3af|havij)")
+    OR (match(user_agent, "(?i)(python-requests|curl|wget|libwww)") AND method!="GET")
+| stats
+    count AS requests,
+    dc(url) AS unique_urls,
+    values(user_agent) AS scanners,
+    values(method) AS methods
+    BY src_ip
+| where requests >= 5
+| eval
+    severity = "high",
+    mitre_technique = "T1595.002",
+    alert_name = "Automated Scanner Detected: " . src_ip . " using " . scanners
+| table _time, src_ip, requests, unique_urls, scanners, methods, alert_name

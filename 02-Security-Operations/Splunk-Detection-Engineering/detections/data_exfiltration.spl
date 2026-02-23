@@ -1,0 +1,124 @@
+`comment("
+================================================================================
+DATA EXFILTRATION DETECTION — SPL Correlation Search
+================================================================================
+MITRE ATT&CK: T1048 — Exfiltration Over Alternative Protocol
+Sub-techniques: T1048.001 (Encrypted), T1048.003 (Unencrypted)
+Related: T1567 (Exfiltration Over Web Service)
+Severity: CRITICAL
+Data Source: sourcetype=attack_sim:netflow
+
+DETECTION LOGIC:
+  Multi-signal exfiltration detection:
+  1. Volume anomaly: Transfer size exceeds 3x baseline for source host
+  2. Destination risk: Transfers to known file-sharing / paste sites
+  3. Temporal anomaly: Large transfers during off-business hours
+  4. DNS tunneling: High-entropy DNS queries with long subdomains
+
+TUNING GUIDANCE:
+  - Baseline: Run the baseline search for 7+ days before enabling alerts
+  - Whitelist: Corporate backup destinations, approved cloud storage,
+    CDN upload endpoints, software update servers
+  - False positives: Large email attachments, video uploads, cloud
+    backups, developer pushing container images
+================================================================================
+")`
+
+`comment("--- SEARCH 1: Volume-Based Exfiltration Detection ---")`
+
+index=attack_sim sourcetype="attack_sim:netflow"
+| eval
+    bytes_out_mb = round(bytes_out / 1048576, 2),
+    transfer_ratio = round(bytes_out / max(bytes_in, 1), 1)
+| where bytes_out_mb >= 5
+| eval
+    is_external = if(
+        NOT cidrmatch("10.0.0.0/8", dst_ip)
+        AND NOT cidrmatch("192.168.0.0/16", dst_ip)
+        AND NOT cidrmatch("172.16.0.0/12", dst_ip),
+        1, 0
+    )
+| where is_external=1
+| eval
+    severity = case(
+        bytes_out_mb >= 100, "critical",
+        bytes_out_mb >= 50, "high",
+        bytes_out_mb >= 10, "medium",
+        1=1, "low"
+    ),
+    mitre_technique = "T1048",
+    alert_name = hostname . " transferred " . bytes_out_mb . " MB to " . domain
+| stats
+    sum(bytes_out) AS total_bytes_out,
+    count AS transfer_count,
+    values(domain) AS destinations,
+    max(bytes_out_mb) AS largest_transfer_mb
+    BY src_ip, hostname
+| eval total_mb = round(total_bytes_out / 1048576, 1)
+| where total_mb >= 10
+| table _time, src_ip, hostname, total_mb, transfer_count, largest_transfer_mb, destinations
+| sort - total_mb
+
+
+`comment("--- SEARCH 2: Suspicious Destination Detection ---")`
+
+index=attack_sim sourcetype="attack_sim:netflow"
+| where match(domain, "(?i)(mega\.nz|paste\.\w+|transfer\.sh|anon|temp-mail|dropmefiles|sendspace|mediafire|zippyshare)")
+    OR match(destination_type, "(paste_site|file_share|anonymous|disposable)")
+| eval
+    bytes_out_mb = round(bytes_out / 1048576, 2),
+    severity = "critical",
+    mitre_technique = "T1567",
+    alert_name = "Data transfer to suspicious destination: " . hostname . " → " . domain . " (" . bytes_out_mb . " MB)"
+| stats
+    sum(bytes_out) AS total_bytes,
+    count AS transfers,
+    values(hostname) AS source_hosts,
+    values(domain) AS target_domains
+    BY src_ip
+| eval total_mb = round(total_bytes / 1048576, 1)
+| table _time, src_ip, source_hosts, total_mb, transfers, target_domains, severity
+
+
+`comment("--- SEARCH 3: Off-Hours Large Transfer Anomaly ---")`
+
+index=attack_sim sourcetype="attack_sim:netflow"
+| eval
+    hour = strftime(_time, "%H"),
+    day_of_week = strftime(_time, "%u"),
+    is_off_hours = if((hour < 7 OR hour > 19) OR (day_of_week > 5), 1, 0),
+    bytes_out_mb = round(bytes_out / 1048576, 2),
+    is_external = if(NOT cidrmatch("10.0.0.0/8", dst_ip), 1, 0)
+| where is_off_hours=1 AND bytes_out_mb >= 5 AND is_external=1
+| eval
+    time_context = case(
+        day_of_week > 5, "weekend",
+        hour < 7, "early-morning",
+        hour > 19, "late-night",
+        1=1, "off-hours"
+    ),
+    severity = "critical",
+    mitre_technique = "T1048",
+    alert_name = "Off-hours exfiltration: " . hostname . " transferred " . bytes_out_mb . " MB at " . strftime(_time, "%H:%M") . " (" . time_context . ")"
+| table _time, src_ip, hostname, dst_ip, domain, bytes_out_mb, time_context, severity, alert_name
+| sort - bytes_out_mb
+
+
+`comment("--- SEARCH 4: DNS Tunneling Exfiltration (Long Subdomain Queries) ---")`
+
+index=attack_sim sourcetype="attack_sim:proxy" event_type="dns_query"
+| where subdomain_length > 20
+| eval
+    entropy = len(replace(query_name, "[a-f0-9]", "")) / len(query_name),
+    severity = if(subdomain_length > 40, "critical", "high"),
+    mitre_technique = "T1048.003",
+    alert_name = "DNS tunneling detected: " . src_ip . " querying " . domain
+| stats
+    count AS query_count,
+    avg(subdomain_length) AS avg_subdomain_len,
+    dc(query_name) AS unique_queries,
+    values(domain) AS c2_domains
+    BY src_ip, hostname
+| where query_count >= 10 AND avg_subdomain_len > 25
+| eval avg_subdomain_len = round(avg_subdomain_len, 0)
+| table _time, src_ip, hostname, query_count, unique_queries, avg_subdomain_len, c2_domains, severity
