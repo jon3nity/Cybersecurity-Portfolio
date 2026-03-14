@@ -14,10 +14,10 @@ This repository documents my hands-on cybersecurity learning journey during my *
 It is a record of real system behavior, structured reasoning, cause-effect-mitigation analysis, and evidence-based security decisions across networking, cloud infrastructure, SIEM operations, and governance frameworks.
 
 ### What You'll Find Here
-- **📚 Applied security work** - Hands-on labs, configurations, and real system interactions
-- **💼 Professional portfolio** - Demonstrable technical capabilities for employers
-- **🔬 Documented problem-solving** - Failures, root causes, and mitigation strategies
-- **📖 Compliance frameworks** - ISO 27001, GDPR, NIST implementations
+- ** Applied security work** - Hands-on labs, configurations, and real system interactions
+- ** Professional portfolio** - Demonstrable technical capabilities for employers
+- ** Documented problem-solving** - Failures, root causes, and mitigation strategies
+- ** Compliance frameworks** - ISO 27001, GDPR, NIST implementations
 
 ---
 
@@ -130,7 +130,7 @@ ISO 27001 ISMS and GDPR compliance implementation with risk assessment, control 
 
 ---
 
-## 💪 Commitment
+## Commitment
 
 **Daily Practice:** Consistent learning, documented progress, hands-on experimentation  
 **Quality Standard:** Evidence-based claims, traceable sources, reproducible results  
