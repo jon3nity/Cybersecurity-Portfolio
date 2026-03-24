@@ -163,19 +163,19 @@ All switches accessible via SSH v2 from Management-MAIN PC (VLAN 6) through inte
 ## Key Engineering Decisions
 
 **Why VLSM instead of uniform subnet sizes?**
-Using /27 for Finance (30 hosts) and /22 for Students (988 hosts) ensures address space is allocated proportionally to actual need. A uniform /22 for every VLAN would waste over 3,000 addresses in the Finance subnet alone. VLSM is mandatory in any real enterprise addressing plan.
+Using /27 for Finance (30 hosts) and /22 for Students (988 hosts) ensures address space is allocated based on actual needs, avoiding wastage of over 3,000 addresses.
 
 **Why VTP Transparent on IDFs rather than Client?**
-A VTP Client switch unconditionally accepts VLAN database updates from any switch with a higher revision number on the same domain. A rogue or misconfigured switch connected to a trunk port can silently delete production VLANs across the entire campus. Transparent mode eliminates this risk. All 9 main building IDFs run Transparent.
+A VTP Client switch unconditionally accepts VLAN database updates from any switch with a higher revision number on the same domain. Using VTP Transparent on Intermediate Distribution Frames (IDFs) prevents rogue switches from affecting VLAN configurations, enhancing security. All 9 main building IDFs run Transparent.
 
 **Why separate Admin users (VLAN 6) from Management plane (VLAN 99)?**
-Placing admin workstations directly in VLAN 99 puts end-user devices on the same subnet as every switch management interface. A compromised workstation would have direct Layer 2 access to all switch management IPs with no routing boundary. Keeping admin users in VLAN 6 forces all management traffic through MDF-SW inter-VLAN routing, where ACLs can be applied to restrict access further.
+Keeping admin users in VLAN 6 and management interfaces in VLAN 99 restricts direct access to critical infrastructure. A compromised workstation would have direct Layer 2 access to all switch management IPs with no routing boundary. Keeping admin users in VLAN 6 forces all management traffic through MDF-SW inter-VLAN routing, where ACLs can be applied to restrict access further.
 
 **Why /30 for the WAN link?**
-A point-to-point router link needs exactly two usable addresses — one per end. A /30 provides exactly that. Using a /24 here wastes 252 addresses. VLSM principles apply to WAN links exactly as they do to LAN subnets.
+A point-to-point router link needs exactly two usable addresses — one per end. A /30 provides exactly that avoiding waste compared to larger subnets.
 
 **Why nonegotiate on every port including access ports?**
-DTP (Dynamic Trunking Protocol) on access ports allows an attacker to negotiate a trunk link from an end device, gaining access to all VLANs on the switch. Disabling DTP with nonegotiate on every port — both trunk and access — eliminates this VLAN hopping attack vector entirely.
+DTP (Dynamic Trunking Protocol) on access ports allows an attacker to negotiate a trunk link from an end device, gaining access to all VLANs on the switch. Disabling DTP with `nonegotiate` on every port, both trunk and access which eliminates this VLAN hopping attack vector entirely.
 
 ---
 
