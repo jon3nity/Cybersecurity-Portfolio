@@ -1,0 +1,29 @@
+## Device Passwords
+
+|  | IDF'S |   |
+|---|---|---|
+| L3-IDF1: jonATUL31 | L3-IDF2: jonATUL32 | L3-IDF3: jonATUL33 |
+| L2-IDF1: jonATUL21 | L2-IDF2: jonATUL22 | L2-IDF3: jonATUL23 |
+| L1-IDF1: jonATUL11 | L1-IDF2: jonATUL12 | L1-IDF3: jonATUL13 |
+
+----
+
+| MDF | EDGE Router |
+| --- | --- |
+| jonATU123$ | jonATUEDGE123$ |
+
+---## Device Passwords
+
+|  | IDF'S |   |
+|---|---|---|
+| L3-IDF1: jonATUL31 | L3-IDF2: jonATUL32 | L3-IDF3: jonATUL33 |
+| L2-IDF1: jonATUL21 | L2-IDF2: jonATUL22 | L2-IDF3: jonATUL23 |
+| L1-IDF1: jonATUL11 | L1-IDF2: jonATUL12 | L1-IDF3: jonATUL13 |
+
+----
+
+| MDF | EDGE Router |
+| --- | --- |
+| jonATU123$ | jonATUEDGE123$ |
+
+---
