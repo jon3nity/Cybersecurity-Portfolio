@@ -25,7 +25,7 @@ This project designs and implements a fully segmented, routed, and hardened ente
 
 ### Physical Topology
 
-![Enterprise Campus Network Topology — ATU Letterkenny](../topology.png)
+![Enterprise Campus Network Topology — ATU Letterkenny](./topology.png)
 
 > **Figure 1:** Enterprise campus network topology showing MDF core switch, 9 IDF access switches across 3 floors (Main Building), CoLab building integration, and EDGE-RTR WAN uplink. Simulated in Cisco Packet Tracer 8.x.
 
@@ -201,20 +201,6 @@ DTP (Dynamic Trunking Protocol) on access ports allows an attacker to negotiate 
 - **VTP v2** — VLAN Trunking Protocol
 - **Spanning Tree Protocol (STP)** — loop prevention
 - **SSH v2 / RSA 2048** — encrypted management access
-
----
-
-## References
-
-Cisco Systems (2024). *Catalyst 2960 Series Switches Software Configuration Guide*. Cisco Press.
-
-Cisco Systems (2024). *Catalyst 3560 Series Switches Software Configuration Guide*. Cisco Press.
-
-Teare, D. (2013). *Implementing Cisco IP Routing (ROUTE) Foundation Learning Guide*. Cisco Press.
-
-Lammle, T. (2023). *CompTIA Network+ Study Guide*. Sybex.
-
-IEEE (2018). *IEEE 802.1Q — Bridges and Bridged Networks*. IEEE Standards Association.
 
 ---
 
