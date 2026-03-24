@@ -27,9 +27,7 @@ This project designs and implements a fully segmented, routed, and hardened ente
 
 ![Enterprise Campus Network Topology — ATU Letterkenny](../topology.png)
 
-> **Figure 1:** Enterprise campus network topology showing MDF core switch, 
-> 9 IDF access switches across 3 floors (Main Building), CoLab building 
-> integration, and EDGE-RTR WAN uplink. Simulated in Cisco Packet Tracer 8.x.
+> **Figure 1:** Enterprise campus network topology showing MDF core switch, 9 IDF access switches across 3 floors (Main Building), CoLab building integration, and EDGE-RTR WAN uplink. Simulated in Cisco Packet Tracer 8.x.
 
 ```
 WAN / Internet
@@ -37,18 +35,21 @@ WAN / Internet
    EDGE-RTR (Router-PT)
       | Fa0/0 — 10.0.0.1/30
       |
-   MAIN-MDF-Switch (Cisco 3560-24PS) — Level 2 / 1st Floor
+   MAIN-MDF-Switch (Rm 2225) — Level 2 / 1st Floor
       | 10.0.0.2/30
       |
-      |— Fa0/1  → L1-IDF1 (Rm 1135)   Level 1 / Ground Floor
-      |— Fa0/2  → L1-IDF2 (Rm 1158G)  Level 1 / Ground Floor
-      |— Fa0/3  → L1-IDF3 (Rm 1175)   Level 1 / Ground Floor
-      |— Fa0/4  → L2-IDF1 (Rm 2260)   Level 2 / 1st Floor
-      |— Fa0/5  → L2-IDF2 (Rm 2204)   Level 2 / 1st Floor
-      |— Fa0/6  → L2-IDF3 (Rm 2299)   Level 2 / 1st Floor
-      |— Fa0/7  → L3-IDF1 (Rm 3728)   Level 3 / 2nd Floor
-      |— Fa0/8  → L3-IDF2 (Rm 3337)   Level 3 / 2nd Floor
-      |— Fa0/9  → L3-IDF3 (Rm 3352)   Level 3 / 2nd Floor
+      |— Fa0/1  → L1-IDF1 (Rm 1120)   Level 1 / Ground Floor
+      |— Fa0/2  → L1-IDF2 (Rm 1125)   Level 1 / Ground Floor
+      |— Fa0/3  → L1-IDF3 (Rm 1130)   Level 1 / Ground Floor
+      |
+      |— Fa0/4  → L2-IDF1 (Rm 2220)   Level 2 / 1st Floor
+      |— Fa0/5  → L2-IDF2 (Rm 2230)   Level 2 / 1st Floor
+      |— Fa0/6  → L2-IDF3 (Rm 2235)   Level 2 / 1st Floor
+      |
+      |— Fa0/7  → L3-IDF1 (Rm 3320)   Level 3 / 2nd Floor
+      |— Fa0/8  → L3-IDF2 (Rm 3325)   Level 3 / 2nd Floor
+      |— Fa0/9  → L3-IDF3 (Rm 3330)   Level 3 / 2nd Floor
+      |
       |— Fa0/10 → COLAB-CORE-SW        CoLab Building
 ```
 
