@@ -25,6 +25,12 @@ This project designs and implements a fully segmented, routed, and hardened ente
 
 ### Physical Topology
 
+![Enterprise Campus Network Topology — ATU Letterkenny](../topology.png)
+
+> **Figure 1:** Enterprise campus network topology showing MDF core switch, 
+> 9 IDF access switches across 3 floors (Main Building), CoLab building 
+> integration, and EDGE-RTR WAN uplink. Simulated in Cisco Packet Tracer 8.x.
+
 ```
 WAN / Internet
       |
