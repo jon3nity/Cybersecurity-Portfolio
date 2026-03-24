@@ -86,7 +86,7 @@ WAN point-to-point link: **10.0.0.0/30** (MDF-SW: 10.0.0.2, EDGE-RTR: 10.0.0.1).
 
 **Domain:** ATU-CAMPUS | **Password:** MD5 hashed (hidden)
 
-Transparent mode on all IDFs was a deliberate security decision. In a VTP Server/Client deployment, a rogue switch with a higher revision number connected to any trunk port can instantly overwrite the VLAN database across the entire network. Transparent mode forwards VTP advertisements without processing them, eliminating this attack vector entirely.
+Transparent mode on all IDFs was a deliberate security decision. It prevents rogue switches from overwriting the VLAN database by forwarding VTP advertisements without processing them.
 
 ---
 
@@ -181,11 +181,11 @@ DTP (Dynamic Trunking Protocol) on access ports allows an attacker to negotiate 
 
 ## Lessons Learned
 
-**Verify immediately after every configuration step.** A single digit typo in an SVI IP address (72.16.4.1 instead of 172.16.4.1) silently broke routing for an entire VLAN. Running `show ip interface brief` immediately after each SVI configuration catches this in seconds rather than after extended troubleshooting.
+**Verify immediately after every configuration step.** A single digit typo in an SVI IP address (72.16.4.1 instead of 172.16.4.1) silently broke routing for an entire VLAN. Running `show ip interface brief` immediately after each SVI configuration catches this quickly.
 
 **One VLAN equals one subnet equals one gateway.** Assigning different gateway IPs to devices in the same VLAN on different floors breaks routing for those devices. The MDF-SW SVI is the single gateway for each VLAN regardless of which floor the device is on. This is a fundamental principle of inter-VLAN routing architecture.
 
-**MAC address table analysis is the most direct connectivity diagnostic.** When ping fails, checking whether the destination MAC has been learned by the intermediate switch immediately distinguishes between a physical connectivity problem, a VLAN misconfiguration, and a routing issue — faster than repeated ping attempts.
+**MAC address table analysis is the most direct connectivity diagnostic.** If a ping fails, checking the destination MAC on the switch reveals if there’s a physical problem, VLAN error, or routing issue.
 
 **Duplicate IPs are immediately catastrophic.** Two switches assigned the same management IP create an ARP conflict that makes management access completely unpredictable. IP address management discipline — tracking every assignment before configuring — prevents this entirely.
 
