@@ -47,7 +47,7 @@ CIDR (Classless Inter-Domain Routing) expresses IP addresses with their prefix l
 
 ### Campus Network VLSM Breakdown — 172.16.0.0/20
 
-Starting with 172.16.0.0/20 (4,094 hosts), allocate in descending size order:
+Starting with 172.16.0.0/20 (4,094 hosts), allocate sizes:
 
 | Step | VLAN | Requirement | Subnet | Prefix | Hosts Available |
 |---|---|---|---|---|---|
@@ -65,7 +65,7 @@ Starting with 172.16.0.0/20 (4,094 hosts), allocate in descending size order:
 | 12 | Management | 80 switches | 172.16.16.0 | /25 | 126 |
 | 13 | WAN link | 2 routers | 10.0.0.0 | /30 | 2 |
 
-**VLSM rule:** Always allocate largest subnets first.
+**VLSM rule:** Always allocate the largest subnets first.
 
 ### Quick Subnet Reference
 

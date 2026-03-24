@@ -27,7 +27,7 @@
 
 **Business Problem:**
 
-A university campus with two buildings, multiple departments, and over 2,300 users required a network architecture that enforced logical separation between user groups, maintained a dedicated management plane for infrastructure devices, and supported both wired and wireless connectivity — all while remaining scalable and administratively manageable.
+A university campus with two buildings, multiple departments, and over 2,300 users required a network architecture that enforced logical separation between user groups, maintained a dedicated management plane for infrastructure devices, and supported both wired and wireless connectivity while remaining scalablity and administrative management.
 
 Without proper segmentation, a flat network would expose Finance and Admin systems to student broadcast traffic, allow lateral movement between departments in a security incident, and make management of individual infrastructure devices unreliable. The design had to balance security, performance, and operational simplicity across a multi-floor, multi-building environment.
 
@@ -68,7 +68,7 @@ The project also required demonstrating enterprise-level decision-making: choosi
 - Configured access ports on all 9 main building IDF switches with correct VLAN assignments, portfast, bpduguard, and nonegotiate
 - Shut down all unused ports and assigned them to VLAN 99 to eliminate VLAN 1 exposure
 - Assigned static IP addresses to all end devices using the VLSM table; verified single gateway per VLAN across all floors
-- Diagnosed and resolved a critical SVI misconfiguration (typo: 72.16.4.1 instead of 172.16.4.1) using `show ip interface brief` verification discipline
+- Diagnosed and resolved a critical SVI misconfiguration (typo: 72.16.4.1 instead of 172.16.4.1) using `show ip interface brief` verification
 
 **Phase 5: Management Plane and Switch Hardening**
 - Assigned management IPs (172.16.16.x/25) to VLAN 99 SVIs on all IDF switches
