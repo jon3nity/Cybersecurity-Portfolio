@@ -158,9 +158,12 @@ CN=John Onyekachi,OU=IT-Labs,OU=ATU-Letterkenny,DC=johnlab,DC=local
 
 ![CLIENT01 login screen showing Sign in to JOHNLAB](./Phase-1-Local-AD/screenshots/08_client_domain_join.png)
 > **Figure 6:** CLIENT01 login screen confirming successful domain join — "Sign in to: JOHNLAB" indicates Kerberos authentication is now handled by DC01.
+---
 
 ![whoami logonserver gpresult verification output](./Phase-1-Local-AD/screenshots/07_domain_verification.png)
 > **Figure 7:** Command-line verification confirming domain membership (johnlab\jonyekachi), authentication source (\\DC01), and LDAP Distinguished Name (CN=John Onyekachi,OU=IT-Labs,OU=ATU-Letterkenny,DC=johnlab,DC=local).
+
+---
 
 ![GPO Student Restriction enforced on CLIENT01](./Phase-1-Local-AD/screenshots/09_GPO_student_restriction_enforced.png)
 > **Figure 8:** ATU-Student-Restrictions GPO enforced live on CLIENT01 — Control Panel access blocked for domain user cryan (Students OU) with system restriction message. GPO configured on DC01 propagated and applied to workstation in real time, confirming end-to-end Group Policy enforcement.
@@ -183,20 +186,32 @@ The Finance Audit GPO generates the following Windows Security Event IDs, which 
 
 ---
 
-## MITRE ATT&CK Context
+## MITRE ATT&CK Context | Attack Scenario Walkthrough — Phished Student Account
 
 This lab environment is deliberately designed to understand the attacker's perspective on Active Directory:
 
-| Technique | ID | What it targets in this lab |
+**Scenario:** An attacker obtains `cryan`'s credentials through a phishing email and logs into CLIENT01 during off-hours.
+
+**What the attacker encounters:**
+
+The `ATU-Student-Restrictions` GPO immediately limits the attack surface. Control Panel is blocked — the attacker cannot change network settings, disable the firewall, or add local accounts. Removable storage is denied — USB-based data exfiltration is prevented. Software installation is blocked — the attacker cannot deploy malware, keyloggers, or command-and-control agents. The attacker is authenticated but operating inside a hardened, restricted environment.
+
+**What DC01 sees — Event IDs generated:**
+
+| Event ID | Description | Significance in this scenario |
 |---|---|---|
-| Kerberoasting | T1558.003 | Service accounts (svc_backup) |
-| DCSync | T1003.006 | DC01 — replication privilege abuse |
-| Pass the Hash | T1550.002 | NTLM hashes from domain users |
-| Golden Ticket | T1558.001 | krbtgt account on DC01 |
-| Account Discovery | T1087.002 | OU and user enumeration |
+| 4624 | Successful logon | cryan authenticates at 9:40pm — outside normal student hours, anomalous time |
+| 4768 | Kerberos TGT requested | DC01 issues a ticket to cryan — source IP 192.168.10.10 expected, unexpected IP would alert |
+| 4769 | Kerberos service ticket | Reveals which resources the attacker attempted to access after login |
+| Object access | Finance resource access | If attacker reaches Finance share — Students OU user accessing Finance data is an immediate anomaly |
 
-Understanding these attack paths against the environment you built is the foundation of effective SOC detection — you know what normal looks like, so anomalies are visible.
+**The absence of Event ID 4740 is itself meaningful:**
 
+No lockout events means the attacker had valid credentials from the start. This immediately rules out brute force and points toward phishing or credential theft — narrowing the investigation before a single log is manually reviewed. A SOC analyst seeing 4624 with no preceding 4625 failures, at an anomalous time, for a student account, is the detection signature for a successful phishing attack.
+
+**The layered defence conclusion:**
+
+No single control stopped the attack — the attacker authenticated successfully. But the combination of GPO restriction (limiting what they could do) and audit policy (generating the Event IDs that expose what they tried to do) is exactly how defence-in-depth operates in a real SOC environment. The GPO buys time; the audit trail enables response.
 ---
 
 ## Repository Structure
