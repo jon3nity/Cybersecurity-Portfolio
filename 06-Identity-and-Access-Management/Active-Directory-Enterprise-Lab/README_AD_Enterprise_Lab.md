@@ -81,7 +81,7 @@ See: [Enterprise Campus Network Design](/01-Networking-Fundamentals/) for the ne
 
 ### 1.2. OU Architecture
 
-Designed to mirror the VLAN segmentation from the Enterprise Campus Network Design:
+Designed to mirror the VLAN segmentation from the [Enterprise Campus Network Design](/01-Networking-Fundamentals/topology.png):
 
 ```
 johnlab.local
@@ -161,6 +161,9 @@ CN=John Onyekachi,OU=IT-Labs,OU=ATU-Letterkenny,DC=johnlab,DC=local
 
 ![whoami logonserver gpresult verification output](./Phase-1-Local-AD/screenshots/07_domain_verification.png)
 > **Figure 7:** Command-line verification confirming domain membership (johnlab\jonyekachi), authentication source (\\DC01), and LDAP Distinguished Name (CN=John Onyekachi,OU=IT-Labs,OU=ATU-Letterkenny,DC=johnlab,DC=local).
+
+![GPO Student Restriction enforced on CLIENT01](./Phase-1-Local-AD/screenshots/09_GPO_student_restriction_enforced.png)
+> **Figure 8:** ATU-Student-Restrictions GPO enforced live on CLIENT01 — Control Panel access blocked for domain user cryan (Students OU) with system restriction message. GPO configured on DC01 propagated and applied to workstation in real time, confirming end-to-end Group Policy enforcement.
 
 ---
 
