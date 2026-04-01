@@ -194,10 +194,8 @@ The design challenge was to build this environment correctly from first principl
 
 ## Related Projects
 
-[Enterprise Campus Network Design](../Campus-Network-Design/) • [Phase 2 — Azure Hybrid (Entra ID)](../AD-Enterprise-Lab/Phase-2/) • [Phase 3 — Microsoft Sentinel SIEM](../AD-Enterprise-Lab/Phase-3/)
+[Enterprise Campus Network Design](/01-Networking-Fundamentals/) • [Phase 2 — Azure Hybrid (Entra ID)](../Active-Directory-Enterprise-Lab/Phase-2-Azure-Hybrid) • [Phase 3 — Microsoft Sentinel SIEM](../Active-Directory-Enterprise-Lab/Phase-3-Sentinel-SIEM/)
 
 ---
-
-**References:** Microsoft (2024). Active Directory Domain Services Overview. Microsoft Learn. | NIST (2020). SP 800-63B Digital Identity Guidelines. National Institute of Standards and Technology. | MITRE (2024). ATT&CK Framework — Credential Access. MITRE Corporation. | Stanek, W.R. (2013). Windows Server 2012 R2 Inside Out. Microsoft Press.
 
 [← Back to Portfolio](../../README.md)

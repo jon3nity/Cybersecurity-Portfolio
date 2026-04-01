@@ -3,7 +3,7 @@
 **Identity & Infrastructure Project | MSc Cybersecurity Portfolio**
 *Atlantic Technological University, Letterkenny | April 2026*
 
-> This lab builds a three-phase enterprise Active Directory environment progressing from a local on-premises domain through Azure hybrid identity to Microsoft Sentinel SIEM monitoring. Each phase represents a distinct layer of real-world enterprise identity architecture that maps to [Enterprise Campus Network Design](../Campus-Network-Design/).
+> This lab builds a three-phase enterprise Active Directory environment progressing from a local on-premises domain through Azure hybrid identity to Microsoft Sentinel SIEM monitoring. Each phase represents a distinct layer of real-world enterprise identity architecture that maps to [Enterprise Campus Network Design](/01-Networking-Fundamentals/).
 
 ---
 
@@ -53,7 +53,7 @@ PHASE 3 — Sentinel SIEM (Planned)
 
 This lab runs on an isolated Host-Only VMware network (192.168.10.0/24). In a production deployment, DC01 would reside in the **Servers VLAN (VLAN 12, 172.16.10.192/27)** of an enterprise campus network, accessible only from Admin VLAN (VLAN 6) and Management VLAN (VLAN 99) via inter-VLAN routing and ACL enforcement at the MDF core switch.
 
-See: [Enterprise Campus Network Design](../Campus-Network-Design/) for the network architecture this lab integrates with.
+See: [Enterprise Campus Network Design](/01-Networking-Fundamentals/) for the network architecture this lab integrates with.
 
 ---
 
@@ -244,4 +244,4 @@ MITRE (2024). ATT&CK Framework v14. MITRE Corporation. Available at: https://att
 
 Stanek, W.R. (2013). *Windows Server 2012 R2 Inside Out*. Microsoft Press.
 
-[← Back to Portfolio](../README.md) | [View Project Summary](./PROJECT_SUMMARY.md)
+[← Back to Portfolio](../../README.md) | [View Project Summary](./PROJECT_SUMMARY_AD_Lab_Phase1.md)
