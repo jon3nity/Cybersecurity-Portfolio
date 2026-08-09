@@ -1,0 +1,1162 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Calc New Counter').first().json;\nconst newCounter = fa.new_counter || 1;\nconst ticketNum = String(newCounter).padStart(4, '0');\nreturn [{ json: { ...fa, ticket_number: 'TKT-' + ticketNum }}];"
+      },
+      "id": "f25a7e73-c290-420e-9817-88042821a386",
+      "name": "Add Ticket Number1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1168,
+        -6192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/ip_addresses/{{$json.source_ip === 'N/A' ? '8.8.8.8' : $json.source_ip}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "YOUR_VIRUSTOTAL_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "41fa031e-314a-43b8-bb45-83381177508c",
+      "name": "VT IP Lookup2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -816,
+        -6640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Add Ticket Number1').first().json;\nconst vt = $('VT IP Lookup2').first().json;\nconst abuse = $('AbuseIPDB Lookup1').first().json;\nconst vtMalicious = vt.data?.attributes?.last_analysis_stats?.malicious || 0;\nconst vtTotal = Object.values(vt.data?.attributes?.last_analysis_stats || {}).reduce((a,b) => a+b, 0);\nconst abuseConf = abuse.data?.abuseConfidenceScore || 0;\nconst abuseCountry = abuse.data?.countryCode || 'Unknown';\nconst failedLogins = typeof fa.failed_login_count === 'number' ? fa.failed_login_count : 0;\nlet verdict = 'Clean', severity = fa.severity, recommendation = 'Monitor';\nif (vtMalicious >= 10 || abuseConf >= 75 || failedLogins >= 20) {\n  verdict = 'Malicious'; severity = 'Critical'; recommendation = 'Block IP immediately';\n} else if (vtMalicious >= 3 || abuseConf >= 25 || failedLogins >= 10) {\n  verdict = 'Suspicious'; severity = 'High'; recommendation = 'Recommend block';\n} else if (vtMalicious >= 1 || abuseConf >= 5 || failedLogins >= 5) {\n  verdict = 'Low Risk'; severity = 'Medium'; recommendation = 'Monitor closely';\n}\nreturn [{ json: { ...fa, ticket_number: fa.ticket_number, severity, vt_malicious_score: vtMalicious, vt_total_engines: vtTotal, aipdb_confidence: abuseConf, aipdb_country: abuseCountry, verdict, recommendation, file_name: 'N/A', file_type: 'N/A', url_verdict: 'N/A', workflow_branch: fa.incident_type === 'Brute Force Attempt' ? 'W2-BruteForce' : 'W3-IPReputation' }}];"
+      },
+      "id": "6c0f8879-27e4-45be-9e94-986439f8a64e",
+      "name": "IP Verdict2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -6640
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/files/{{$json.file_hash}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "YOUR_VIRUSTOTAL_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ea515c1d-e85f-4a07-9af8-2125a01afbb9",
+      "name": "VT Hash Lookup2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -608,
+        -6432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Add Ticket Number1').first().json;\nconst vt = $('VT Hash Lookup2').first().json;\nconst vtMalicious = vt.data?.attributes?.last_analysis_stats?.malicious || 0;\nconst vtSuspicious = vt.data?.attributes?.last_analysis_stats?.suspicious || 0;\nconst vtTotal = Object.values(vt.data?.attributes?.last_analysis_stats || {}).reduce((a,b) => a+b, 0);\nconst vtName = vt.data?.attributes?.meaningful_name || 'Unknown file';\nconst vtType = vt.data?.attributes?.type_description || 'Unknown type';\nlet verdict = 'Clean', severity = fa.severity, recommendation = 'No action required';\nif (vtMalicious >= 10) {\n  verdict = 'Malicious'; severity = 'Critical'; recommendation = 'Quarantine file, isolate endpoint, escalate to IR team';\n} else if (vtMalicious >= 3 || vtSuspicious >= 5) {\n  verdict = 'Suspicious'; severity = 'High'; recommendation = 'Quarantine file, investigate endpoint';\n} else if (vtMalicious >= 1 || vtSuspicious >= 1) {\n  verdict = 'Low Risk'; severity = 'Medium'; recommendation = 'Monitor endpoint, notify user';\n}\nreturn [{ json: { ...fa, ticket_number: fa.ticket_number, severity, vt_malicious_score: vtMalicious, vt_total_engines: vtTotal, aipdb_confidence: 'N/A', aipdb_country: 'N/A', verdict, recommendation, file_name: vtName, file_type: vtType, url_verdict: 'N/A', workflow_branch: 'W4-MalwareHash' }}];"
+      },
+      "id": "3ace91fa-9ab4-47d3-a753-eecafb08a69e",
+      "name": "Hash Verdict2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -6432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Add Ticket Number1').first().json;\nreturn [{ json: { ...fa, ticket_number: fa.ticket_number, vt_malicious_score: 'N/A', vt_total_engines: 'N/A', aipdb_confidence: 'N/A', aipdb_country: 'N/A', verdict: 'Ticket Created', recommendation: 'Assigned for analyst review', file_name: 'N/A', file_type: 'N/A', url_verdict: 'N/A', workflow_branch: 'W5-TicketCreation' }}];"
+      },
+      "id": "7d262271-fc10-4947-9d01-6def0778d596",
+      "name": "Default Ticket2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -6096
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "master-ir",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "be511177-cfca-4c3b-8111-b0c54ade4c71",
+      "name": "Webhook1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1648,
+        -6416
+      ],
+      "webhookId": "YOUR_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst event = body.event || body;\nconst senderEmail = event.sender_email || '';\nconst senderDomain = senderEmail.includes('@') ? senderEmail.split('@')[1].toLowerCase() : 'N/A';\nconst emailBody = event.email_body || '';\nconst urlMatch = emailBody.match(/https?:\\/\\/[^\\s\"'<>]+/);\nconst extractedUrl = urlMatch ? urlMatch[0] : 'none';\nreturn [{ json: { alert_id: event.alert_id || 'ALERT-' + Date.now(), incident_type: event.incident_type || 'Generic Alert', severity: event.severity || 'Medium', source_ip: event.source_ip || 'N/A', hostname: event.hostname || 'N/A', user: event.user || 'N/A', description: event.description || 'Security alert detected', timestamp: new Date().toLocaleString('en-IE', { timeZone: 'Europe/Dublin' }), status: 'Open', file_hash: event.file_hash || 'N/A', failed_login_count: event.failed_login_count || 'N/A', sender_email: senderEmail || 'N/A', sender_domain: senderDomain, extracted_url: extractedUrl, email_subject: event.email_subject || 'N/A' } }];"
+      },
+      "id": "31648b52-75c6-41cf-b3cd-3c3b67dd17e8",
+      "name": "Format Alert1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1408,
+        -6416
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\": \"received\", \"message\": \"Master IR workflow initiated\"}",
+        "options": {}
+      },
+      "id": "8ee02436-1e5d-4368-ac18-9bd9da439d4a",
+      "name": "Respond to Webhook1",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1184,
+        -6032
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "ipAddress",
+              "value": "={{ $('Format Alert1').first().json.source_ip }}"
+            },
+            {
+              "name": "maxAgeInDays",
+              "value": "90"
+            },
+            {
+              "name": "verbose",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Key",
+              "value": "YOUR_ABUSEIPDB_API_KEY"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "78a9ae77-0027-4bfb-a4d9-720040a3d270",
+      "name": "AbuseIPDB Lookup1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -624,
+        -6640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst whitelistDomains = ['knowbe4.com','phishingtest.com','knowbe4simulation.com','phishme.com','cofense.com','proofpointessentials.com'];\nconst isSimulation = whitelistDomains.includes(d.sender_domain);\nreturn [{ json: { ...d, is_simulation: isSimulation } }];"
+      },
+      "id": "010bd290-2adc-45dd-bb93-2c83aa5c3d0e",
+      "name": "Whitelist Check2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -6272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_simulation }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              },
+              "id": "dfe32824-52d7-4492-bc33-b1939b78397a"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d20bfd44-303b-4faa-a120-6464f4ad8911",
+      "name": "Is Simulation?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        -6272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $input.first().json;\nreturn [{ json: { ...fa, severity: 'Informational', status: 'Closed', vt_malicious_score: 'N/A', vt_total_engines: 'N/A', aipdb_confidence: 'N/A', aipdb_country: 'N/A', verdict: 'Simulation - False Positive', recommendation: 'No action required - known simulation sender', file_name: 'N/A', file_type: 'N/A', url_verdict: 'Simulation', workflow_branch: 'W1-Phishing-Simulation' }}];"
+      },
+      "id": "e2188b54-abe4-452e-9cfc-0b2fd1c72c20",
+      "name": "Simulation Verdict2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -6352
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.virustotal.com/api/v3/urls",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "YOUR_VIRUSTOTAL_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Format Alert1').first().json.extracted_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "189a38ee-66c7-49d3-8a9f-8699bf3ab412",
+      "name": "VT Submit URL2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        -6192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const submitResponse = $input.first().json;\nconst analysisId = submitResponse.data?.id || '';\nreturn [{ json: { analysis_id: analysisId } }];"
+      },
+      "id": "8fed53e1-f7e9-4294-a7cd-0e975e035490",
+      "name": "Extract Analysis ID2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -6192
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15,
+        "unit": "seconds"
+      },
+      "id": "0212cdbb-c1c6-4ac6-a016-1d6770c216e5",
+      "name": "Wait 15s2",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -6048
+      ],
+      "webhookId": "YOUR_WAIT_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "url": "=https://www.virustotal.com/api/v3/analyses/{{$('Extract Analysis ID2').first().json.analysis_id}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-apikey",
+              "value": "YOUR_VIRUSTOTAL_API_KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7e0e0b7d-d95f-4dda-9853-cc6190b2da6f",
+      "name": "VT Get URL Results2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        -6048
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Add Ticket Number1').first().json;\nconst vtResults = $('VT Get URL Results2').first().json;\nconst stats = vtResults.data?.attributes?.stats || {};\nconst vtMalicious = stats.malicious || 0;\nconst vtSuspicious = stats.suspicious || 0;\nconst vtTotal = Object.values(stats).reduce((a,b) => a+b, 0);\nlet urlVerdict = 'Clean', verdict = 'Clean', severity = fa.severity, recommendation = 'No action required';\nif (vtMalicious >= 5) {\n  urlVerdict = 'Malicious'; verdict = 'Phishing Confirmed'; severity = 'Critical'; recommendation = 'Delete email, reset credentials, isolate if clicked';\n} else if (vtMalicious >= 2 || vtSuspicious >= 3) {\n  urlVerdict = 'Suspicious'; verdict = 'Likely Phishing'; severity = 'High'; recommendation = 'Quarantine email, warn user, investigate';\n} else if (vtMalicious >= 1) {\n  urlVerdict = 'Low Risk'; verdict = 'Possible Phishing'; severity = 'Medium'; recommendation = 'Monitor, notify user';\n}\nreturn [{ json: { ...fa, ticket_number: fa.ticket_number, severity, vt_malicious_score: vtMalicious, vt_total_engines: vtTotal, aipdb_confidence: 'N/A', aipdb_country: 'N/A', verdict, recommendation, file_name: 'N/A', file_type: 'N/A', url_verdict: urlVerdict, workflow_branch: 'W1-Phishing' }}];"
+      },
+      "id": "8a0872ca-78f0-4416-b544-14390744aba9",
+      "name": "Phishing Verdict2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        -6048
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst emoji = d.verdict === 'Malicious' || d.verdict === 'Phishing Confirmed' ? '\ud83d\udd34' : d.verdict === 'Suspicious' || d.verdict === 'Likely Phishing' ? '\ud83d\udfe0' : d.verdict === 'Low Risk' || d.verdict === 'Possible Phishing' ? '\ud83d\udfe1' : d.verdict === 'Simulation - False Positive' ? '\ud83d\udd35' : d.verdict === 'Ticket Created' ? '\ud83d\udccb' : '\ud83d\udfe2';\nconst recEmoji = d.recommendation.includes('Block IP immediately') ? '\ud83d\udeab' : d.recommendation.includes('Recommend block') ? '\u26a0\ufe0f' : d.recommendation.includes('Delete email') ? '\ud83d\udea8' : d.recommendation.includes('Quarantine') ? '\u26a0\ufe0f' : d.recommendation.includes('Simulation') ? '\u2139\ufe0f' : '\ud83d\udc41\ufe0f';\nconst fields = [{ type: 'mrkdwn', text: '*Ticket Number:*\\n' + d.ticket_number }, { type: 'mrkdwn', text: '*Alert ID:*\\n' + d.alert_id }, { type: 'mrkdwn', text: '*Incident Type:*\\n' + d.incident_type }, { type: 'mrkdwn', text: '*Severity:*\\n' + d.severity }, { type: 'mrkdwn', text: '*Verdict:*\\n' + d.verdict }, { type: 'mrkdwn', text: '*Hostname:*\\n' + d.hostname }, { type: 'mrkdwn', text: '*User:*\\n' + d.user }];\nif (d.source_ip !== 'N/A') fields.push({ type: 'mrkdwn', text: '*Source IP:*\\n' + d.source_ip }, { type: 'mrkdwn', text: '*VT Malicious:*\\n' + d.vt_malicious_score + ' / ' + d.vt_total_engines + ' engines' }, { type: 'mrkdwn', text: '*AbuseIPDB:*\\n' + d.aipdb_confidence + '% | ' + d.aipdb_country });\nif (d.file_hash !== 'N/A') fields.push({ type: 'mrkdwn', text: '*File Hash:*\\n' + d.file_hash }, { type: 'mrkdwn', text: '*File:*\\n' + d.file_name + ' (' + d.file_type + ')' }, { type: 'mrkdwn', text: '*VT Malicious:*\\n' + d.vt_malicious_score + ' / ' + d.vt_total_engines + ' engines' });\nif (d.sender_domain !== 'N/A') fields.push({ type: 'mrkdwn', text: '*Sender Domain:*\\n' + d.sender_domain }, { type: 'mrkdwn', text: '*URL Verdict:*\\n' + d.url_verdict }, { type: 'mrkdwn', text: '*Extracted URL:*\\n' + d.extracted_url });\nif (d.failed_login_count !== 'N/A') fields.push({ type: 'mrkdwn', text: '*Failed Logins:*\\n' + d.failed_login_count + ' attempts' });\nconst payload = { text: emoji + ' Sybersek IR - ' + d.ticket_number + ' - ' + d.incident_type + ' - ' + d.verdict, blocks: [{ type: 'header', text: { type: 'plain_text', text: emoji + ' ' + d.ticket_number + ' - ' + d.incident_type + ' | ' + d.severity + ' Severity' } }, { type: 'section', fields: fields.slice(0,8) }, fields.length > 8 ? { type: 'section', fields: fields.slice(8) } : null, { type: 'section', text: { type: 'mrkdwn', text: recEmoji + ' *Recommendation: ' + d.recommendation + '*' } }, { type: 'section', text: { type: 'mrkdwn', text: '*Description:*\\n' + d.description } }, { type: 'context', elements: [{ type: 'mrkdwn', text: '\ud83d\udd50 ' + d.timestamp + '  |  Branch: ' + d.workflow_branch + '  |  Status: ' + d.status }] }].filter(Boolean) };\nreturn [{ json: payload }];"
+      },
+      "id": "f3ad3c29-fa08-4826-9075-4f75c65b15ef",
+      "name": "Build Slack Payload1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -6368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hooks.slack.com/services/YOUR_SLACK_WEBHOOK_URL",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "77e133be-353e-4f8f-adea-5d5ea6037e46",
+      "name": "Slack Notification1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        848,
+        -6368
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Brute Force Attempt",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Suspicious Outbound Traffic",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "ec59745e-f2d5-4d87-848a-0689141e92ff",
+      "name": "IF IP Branch2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        -6656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c3",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Malware Detected",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "66b8819b-1cff-4eec-b64e-04c72be1b630",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Malware",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "53f1df30-2b1d-4706-9766-c86d4114182d",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Execution",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "23e4d650-d2e6-45eb-84df-362188badc44",
+      "name": "IF Malware Branch2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -992,
+        -6352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "c4",
+              "leftValue": "={{ $json.incident_type }}",
+              "rightValue": "Phishing Attempt",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "99bc5a35-e464-4861-8e3e-539063769cd1",
+      "name": "IF Phishing Branch2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        -6256
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0554bfc4-30dc-4f19-83a7-52c9ad35ec92",
+              "leftValue": "={{ $json.file_hash }}",
+              "rightValue": "N/A",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -832,
+        -6416
+      ],
+      "id": "6d9f2f63-b31e-4742-a04d-c685f6d2174e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "id": "6a3aa379-3578-42d4-9012-30c6aa1acb5c",
+      "name": "Every 5 Minutes2",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1648,
+        -5824
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://login.microsoftonline.com/YOUR_ENTRA_TENANT_ID/oauth2/v2.0/token",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "client_id",
+              "value": "YOUR_AZURE_APP_CLIENT_ID"
+            },
+            {
+              "name": "client_secret",
+              "value": "YOUR_AZURE_CLIENT_SECRET"
+            },
+            {
+              "name": "scope",
+              "value": "https://graph.microsoft.com/.default"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ae83fceb-aaba-45d9-a1b7-d9280dd0ac5c",
+      "name": "Get Graph Token2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1456,
+        -5824
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{\"https://graph.microsoft.com/v1.0/auditLogs/signIns?$filter=status/errorCode ne 0 and createdDateTime ge \" + new Date(Date.now() - 10 * 60 * 1000).toISOString() + \"&$top=50&$orderby=createdDateTime desc\"}}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('Get Graph Token2').first().json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "64105284-412b-4124-80de-cb609f4cf820",
+      "name": "Get Failed Sign-ins2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1264,
+        -5824
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const signIns = $input.first().json.value || [];\nif (signIns.length === 0) return [];\nconst ipGroups = {};\nfor (const s of signIns) {\n  const ip = s.ipAddress || 'unknown';\n  const user = s.userPrincipalName || 'unknown';\n  const time = s.createdDateTime;\n  if (!ipGroups[ip]) ipGroups[ip] = { count: 0, users: new Set(), earliest: time };\n  ipGroups[ip].count++;\n  ipGroups[ip].users.add(user);\n  if (time < ipGroups[ip].earliest) ipGroups[ip].earliest = time;\n}\nconst alerts = [];\nfor (const [ip, data] of Object.entries(ipGroups)) {\n  if (data.count >= 2) {\n    const users = [...data.users];\n    const isSpray = users.length > 1;\n    alerts.push({ alert_id: 'GRAPH-BF-' + ip.replace(/\\./g, '-') + '-' + new Date(data.earliest).getTime(), incident_type: 'Brute Force Attempt', severity: data.count >= 15 ? 'Critical' : data.count >= 10 ? 'High' : 'Medium', source_ip: ip, hostname: 'sybersek-entra', user: users.join(', '), description: isSpray ? 'Password spray detected: ' + data.count + ' failures across ' + users.length + ' accounts from ' + ip : 'Brute force detected: ' + data.count + ' failed logins for ' + users[0] + ' from ' + ip, file_hash: 'N/A', failed_login_count: data.count, sender_email: '', email_body: '' });\n  }\n}\nreturn alerts.map(a => ({ json: a }));"
+      },
+      "id": "f4b5ffe8-f02e-40e1-ba1b-74a2405968fb",
+      "name": "Analyse Sign-ins2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1056,
+        -5824
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-alerts",
+              "leftValue": "=={{ $json.alert_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ef63d322-63f5-4350-812d-7409ad762c45",
+      "name": "Has Alerts?2",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        -5824
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://YOUR_NGROK_DOMAIN.ngrok-free.app/webhook/master-ir",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "9deb5ed3-0c01-441e-bfea-241c232a96b9",
+      "name": "Send to Master IR2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -560,
+        -5840
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/YOUR_GOOGLE_SHEET_ID/values/Sheet2!A1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1248,
+        -6400
+      ],
+      "id": "044eee49-2aa2-4a7c-bf95-7ad8f3641685",
+      "name": "Read Counter",
+      "credentials": {
+        "oAuth2Api": {
+          "id": "YOUR_OAUTH2_CREDENTIAL_ID",
+          "name": "Unnamed credential"
+        },
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const fa = $('Format Alert1').first().json;\nconst raw = $input.first().json;\nconst currentValue = parseInt(raw?.values?.[0]?.[0] ?? raw?.[0]?.[0] ?? '0');\nconst newCounter = isNaN(currentValue) ? 1 : currentValue + 1;\nreturn [{ json: { ...fa, new_counter: newCounter } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1456,
+        -6192
+      ],
+      "id": "2dccf819-26d3-44ee-9e55-9b84724286ae",
+      "name": "Calc New Counter"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/YOUR_GOOGLE_SHEET_ID/values/Sheet2!A1?valueInputOption=RAW",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ '{\"values\":[[' + $('Calc New Counter').first().json.new_counter + ']]}'  }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1312,
+        -6192
+      ],
+      "id": "7cc380ef-7f47-4614-95c0-0fcf2fbf2920",
+      "name": "Write Counter",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "YOUR_GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Add Ticket Number1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF IP Branch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VT IP Lookup2": {
+      "main": [
+        [
+          {
+            "node": "AbuseIPDB Lookup1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IP Verdict2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VT Hash Lookup2": {
+      "main": [
+        [
+          {
+            "node": "Hash Verdict2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hash Verdict2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Ticket2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Format Alert1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert1": {
+      "main": [
+        [
+          {
+            "node": "Read Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AbuseIPDB Lookup1": {
+      "main": [
+        [
+          {
+            "node": "IP Verdict2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whitelist Check2": {
+      "main": [
+        [
+          {
+            "node": "Is Simulation?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Simulation?2": {
+      "main": [
+        [
+          {
+            "node": "Simulation Verdict2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "VT Submit URL2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simulation Verdict2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VT Submit URL2": {
+      "main": [
+        [
+          {
+            "node": "Extract Analysis ID2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Analysis ID2": {
+      "main": [
+        [
+          {
+            "node": "Wait 15s2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 15s2": {
+      "main": [
+        [
+          {
+            "node": "VT Get URL Results2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "VT Get URL Results2": {
+      "main": [
+        [
+          {
+            "node": "Phishing Verdict2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Phishing Verdict2": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Build Slack Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Slack Payload1": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF IP Branch2": {
+      "main": [
+        [
+          {
+            "node": "VT IP Lookup2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Malware Branch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Malware Branch2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "IF Phishing Branch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Phishing Branch2": {
+      "main": [
+        [
+          {
+            "node": "Whitelist Check2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Default Ticket2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "VT Hash Lookup2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Default Ticket2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 5 Minutes2": {
+      "main": [
+        [
+          {
+            "node": "Get Graph Token2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Graph Token2": {
+      "main": [
+        [
+          {
+            "node": "Get Failed Sign-ins2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Failed Sign-ins2": {
+      "main": [
+        [
+          {
+            "node": "Analyse Sign-ins2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse Sign-ins2": {
+      "main": [
+        [
+          {
+            "node": "Has Alerts?2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Alerts?2": {
+      "main": [
+        [
+          {
+            "node": "Send to Master IR2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Counter": {
+      "main": [
+        [
+          {
+            "node": "Calc New Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calc New Counter": {
+      "main": [
+        [
+          {
+            "node": "Write Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Counter": {
+      "main": [
+        [
+          {
+            "node": "Add Ticket Number1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "YOUR_N8N_INSTANCE_ID"
+  }
+}
